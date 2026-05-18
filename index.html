@@ -164,25 +164,33 @@ body {
 }
 .btn-primary:active { transform: scale(.97); }
 
-/* FAB - fixed to right side with spacing */
-.fab {
+/* FAB - anchored to app-shell right side */
+.fab-wrapper {
   position: fixed;
   bottom: calc(var(--nav-h) + 20px);
   right: 20px;
+  z-index: 60;
+  pointer-events: none;
+}
+/* On desktop centre the shell, keep FAB at its right edge */
+@media(min-width:600px){
+  .fab-wrapper {
+    /* shell is centred at 50%, width 430px → right edge = 50% - 215px */
+    right: calc(50% - 215px + 16px);
+  }
+}
+.fab {
+  position: relative; /* relative inside wrapper - never shifts */
   width: 54px; height: 54px; border-radius: 50%;
   background: var(--soft-black); color: var(--white);
   border: none; font-size: 26px; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
   box-shadow: 0 6px 24px rgba(17,17,17,0.35);
-  z-index: 60; transition: transform .2s, box-shadow .2s;
+  pointer-events: all;
+  overflow: hidden; /* clip ripple cleanly */
+  transition: box-shadow .2s;
 }
-.fab:active { transform: scale(.93); }
-/* On desktop (max-width shell), keep it inside the shell at right edge */
-@media(min-width:600px){
-  .fab {
-    right: calc(50% - 215px + 16px);
-  }
-}
+.fab:active { box-shadow: 0 2px 10px rgba(17,17,17,0.3); }
 
 .bottom-nav {
   position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
@@ -305,11 +313,14 @@ body {
   aspect-ratio: 1; border-radius: 50%; display: flex; align-items: center; justify-content: center;
   font-size: 13px; font-weight: 500; color: var(--soft-black);
   transition: background .15s, color .15s;
-  cursor: default; /* Read-only cursor */
+  cursor: pointer; /* Clickable to view day details */
 }
-.cal-cell.empty { pointer-events: none; }
+.cal-cell.empty { pointer-events: none; cursor: default; }
+.cal-cell.future { color: var(--text-light); cursor: default; pointer-events: none; }
+.cal-cell:not(.empty):not(.future):hover { background: var(--cream2); }
 .cal-cell.other-month { color: var(--text-light); }
 .cal-cell.today { background: var(--yellow); font-weight: 700; }
+.cal-cell.selected-day { background: var(--soft-black); color: white !important; font-weight: 700; }
 .cal-cell.completed-mark { position: relative; }
 .cal-cell.completed-mark::after {
   content: ''; position: absolute; bottom: 4px; left: 50%; transform: translateX(-50%);
@@ -736,9 +747,12 @@ body {
     </div>
   </nav>
 
-  <!-- FAB - right side with spacing -->
-  <button class="fab" id="mainFab" onclick="openAddHabit()">＋</button>
 
+</div>
+
+<!-- FAB wrapper lives outside app-shell so it's always fixed to viewport right -->
+<div class="fab-wrapper" id="fabWrapper">
+  <button class="fab" id="mainFab" onclick="openAddHabit()">＋</button>
 </div>
 
 <!-- ADD HABIT MODAL -->
@@ -863,7 +877,7 @@ body {
       </div>
     </div>
     <input type="file" id="journalPhotoInput" accept="image/*" style="display:none" onchange="handleJournalPhoto(event)">
-    <input type="file" id="journalCameraInput" accept="image/*" capture="environment" style="display:none" onchange="handleJournalPhoto(event)">
+    <input type="file" id="journalCameraInput" accept="image/*" capture="camera" style="display:none" onchange="handleJournalPhoto(event)">
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeModal('journalWriteModal')">Cancel</button>
       <button class="btn-save" onclick="saveJournalEntry()">Save Entry 📔</button>
@@ -1060,8 +1074,8 @@ function switchPage(page) {
     n.classList.toggle('active', pages[i] === page);
   });
   state.currentPage = page;
-  const fab = document.getElementById('mainFab');
-  fab.style.display = (page === 'home') ? 'flex' : 'none';
+  const fabW = document.getElementById('fabWrapper');
+  fabW.style.display = (page === 'home') ? 'block' : 'none';
   if (page === 'home') renderHome();
   if (page === 'journal') renderJournal();
   if (page === 'analytics') renderAnalytics();
@@ -1609,9 +1623,10 @@ function renderAnalytics() {
   container.innerHTML = html;
 }
 
-// ===== CALENDAR PAGE (read-only) =====
+// ===== CALENDAR PAGE (view-only with day details) =====
 let calPageDate = new Date();
 let calPageHabitId = null;
+let calSelectedDate = null; // date string of tapped day
 
 function renderCalendarPage() {
   const container = document.getElementById('calendarContent');
@@ -1646,20 +1661,105 @@ function renderCalendarPage() {
       <div class="calendar-legend">
         <div class="legend-item"><div class="legend-dot" style="background:var(--teal)"></div> Completed</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--yellow)"></div> Today</div>
+        <div class="legend-item" style="font-style:italic;">Tap a date to see details</div>
       </div>
     </div>
-    <div style="padding:0 16px 16px;">
+    <div style="padding:0 16px 8px;">
       <div style="background:var(--white);border-radius:var(--radius-xl);padding:16px;box-shadow:var(--shadow-card);">
         <div style="font-size:13px;font-weight:700;color:var(--soft-black);margin-bottom:10px;">Monthly Summary</div>
         ${buildMonthSummary()}
       </div>
-    </div>`;
+    </div>
+    <div id="calDayDetail" style="padding:0 16px 16px;"></div>`;
   container.innerHTML = html;
+
+  // If a date was already selected, show its detail
+  if (calSelectedDate) renderCalDayDetail(calSelectedDate);
 }
 
 function selectCalHabit(id) {
   calPageHabitId = id;
+  calSelectedDate = null;
   renderCalendarPage();
+}
+
+function viewCalDay(ds) {
+  calSelectedDate = ds;
+  // Rebuild calendar to show selected highlight
+  const calMain = document.querySelector('.calendar-main');
+  if (calMain) {
+    // Re-render just the grid inside calendar-main efficiently
+    renderCalendarPage();
+    return;
+  }
+  renderCalDayDetail(ds);
+}
+
+function renderCalDayDetail(ds) {
+  const detail = document.getElementById('calDayDetail');
+  if (!detail) return;
+
+  const d = new Date(ds + 'T00:00:00');
+  const label = d.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  const isToday = ds === todayStr();
+
+  // All habits and their completion status for this day
+  const habitRows = state.habits.map(h => {
+    const done = !!state.completions[h.id + '_' + ds];
+    // Notes logged for this habit on this day
+    const notes = state.notes.filter(n => n.habitId === h.id && n.date === ds);
+    return { h, done, notes };
+  });
+
+  const doneCount = habitRows.filter(r => r.done).length;
+
+  let html = `
+    <div style="background:var(--white);border-radius:var(--radius-xl);padding:18px 16px;box-shadow:var(--shadow-card);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--soft-black);">${isToday ? '📅 Today' : label.split(',')[0] + ',' + label.split(',').slice(1).join(',')}</div>
+          <div style="font-size:11px;color:var(--text-light);margin-top:2px;">${label}</div>
+        </div>
+        <div style="background:var(--cream);border-radius:100px;padding:6px 14px;font-size:13px;font-weight:700;color:var(--soft-black);">${doneCount}/${state.habits.length} done</div>
+      </div>`;
+
+  habitRows.forEach(({ h, done, notes }) => {
+    html += `
+      <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-top:1px solid var(--cream);">
+        <div style="width:36px;height:36px;border-radius:10px;background:${h.color}22;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">${h.icon}</div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="font-size:13px;font-weight:600;color:var(--soft-black);flex:1;">${escHtml(h.name)}</div>
+            <div style="font-size:18px;">${done ? '✅' : '⬜'}</div>
+          </div>
+          ${done ? `<div style="font-size:11px;color:var(--teal);font-weight:600;margin-top:2px;">Completed</div>` : `<div style="font-size:11px;color:var(--text-light);margin-top:2px;">Not completed</div>`}
+          ${notes.map(n => `
+            <div style="background:var(--cream);border-radius:8px;padding:8px 10px;margin-top:6px;">
+              ${n.text ? `<div style="font-size:12px;color:var(--soft-black);line-height:1.5;">${escHtml(n.text)}</div>` : ''}
+              ${n.mood ? `<div style="font-size:11px;color:var(--text-light);margin-top:3px;">${n.mood} ${moodLabel(n.mood)}</div>` : ''}
+              ${n.photo ? `<img src="${n.photo}" style="width:100%;border-radius:6px;margin-top:6px;max-height:100px;object-fit:cover;" loading="lazy">` : ''}
+            </div>`).join('')}
+        </div>
+      </div>`;
+  });
+
+  // Journal entries for this day
+  const journalEntries = state.journalEntries.filter(e => e.date === ds);
+  if (journalEntries.length > 0) {
+    html += `<div style="border-top:1px solid var(--cream);margin-top:8px;padding-top:10px;">
+      <div style="font-size:11px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Journal</div>`;
+    journalEntries.forEach(e => {
+      html += `<div style="background:var(--cream);border-radius:8px;padding:10px 12px;margin-bottom:6px;">
+        ${e.mood ? `<div style="font-size:16px;margin-bottom:4px;">${e.mood}</div>` : ''}
+        ${e.text ? `<div style="font-size:12px;color:var(--soft-black);line-height:1.5;">${escHtml(e.text)}</div>` : ''}
+        ${e.photo ? `<img src="${e.photo}" style="width:100%;border-radius:6px;margin-top:6px;max-height:120px;object-fit:cover;" loading="lazy">` : ''}
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
+  html += `</div>`;
+  detail.innerHTML = html;
 }
 
 function buildCalendar() {
@@ -1669,6 +1769,7 @@ function buildCalendar() {
   const firstDay = new Date(y, m, 1).getDay();
   const daysInMonth = new Date(y, m+1, 0).getDate();
   const habit = state.habits.find(h => h.id === calPageHabitId);
+  const todayD = new Date(todayStr() + 'T00:00:00');
 
   let html = `
     <div class="cal-header">
@@ -1684,14 +1785,21 @@ function buildCalendar() {
   for (let i = 0; i < firstDay; i++) html += `<div class="cal-cell empty"></div>`;
   for (let d = 1; d <= daysInMonth; d++) {
     const dd = new Date(y, m, d);
-    const ds = dateStr(dd);
+    const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const isToday = ds === todayStr();
+    const isFuture = dd > todayD;
     const done = habit && !!state.completions[habit.id + '_' + ds];
+    const isSelected = ds === calSelectedDate;
+
     let cls = 'cal-cell';
-    if (isToday) cls += ' today';
+    if (isFuture) cls += ' future';
+    else if (isSelected) cls += ' selected-day';
+    else if (isToday) cls += ' today';
     if (done) cls += ' completed-mark';
-    // Read-only: no onclick, no pointer cursor (handled by CSS cursor:default)
-    html += `<div class="${cls}" style="${done && !isToday ? 'background:' + (habit ? habit.color : 'var(--teal)') + '33;font-weight:700;' : ''}">${d}</div>`;
+
+    const bg = done && !isToday && !isSelected ? `background:${habit ? habit.color : 'var(--teal)'}22;font-weight:700;` : '';
+    const click = isFuture ? '' : `onclick="viewCalDay('${ds}')"`;
+    html += `<div class="${cls}" ${click} style="${bg}">${d}</div>`;
   }
   html += `</div>`;
   return html;
@@ -2007,7 +2115,7 @@ function showToast(msg) {
 
 // ===== RIPPLE =====
 document.addEventListener('click', e => {
-  const target = e.target.closest('.habit-card, .btn-primary, .btn-save, .btn-cancel, .fab, .nav-item');
+  const target = e.target.closest('.habit-card, .btn-primary, .btn-save, .btn-cancel, .nav-item');
   if (!target) return;
   const ripple = document.createElement('div');
   ripple.className = 'ripple';
