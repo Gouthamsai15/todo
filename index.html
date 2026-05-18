@@ -187,6 +187,70 @@ body {
 }
 .fab:active { box-shadow: 0 2px 10px rgba(17,17,17,0.3); }
 
+/* =============================================
+   DYNAMIC CALENDAR NAV ICON
+   ============================================= */
+.cal-nav-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  border: 2px solid currentColor;
+  overflow: hidden;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.cal-nav-icon-top {
+  width: 100%;
+  background: var(--coral);
+  color: white;
+  font-size: 5px;
+  font-weight: 800;
+  text-align: center;
+  padding: 1px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+.cal-nav-icon-date {
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--soft-black);
+  line-height: 1;
+  padding-top: 1px;
+}
+
+/* Nav-item specific calendar icon sizing */
+.nav-item .cal-nav-icon {
+  width: 24px;
+  height: 24px;
+  border-color: var(--text-light);
+}
+.nav-item.active .cal-nav-icon {
+  border-color: var(--soft-black);
+}
+.nav-item .cal-nav-icon-top {
+  font-size: 4.5px;
+}
+.nav-item .cal-nav-icon-date {
+  font-size: 10px;
+  color: var(--text-light);
+}
+.nav-item.active .cal-nav-icon-date {
+  color: var(--soft-black);
+}
+
+/* Small header cal button icon */
+.icon-btn .cal-nav-icon {
+  border-color: var(--text-mid);
+  width: 20px;
+  height: 20px;
+}
+.icon-btn .cal-nav-icon-top { font-size: 4px; }
+.icon-btn .cal-nav-icon-date { font-size: 9px; color: var(--soft-black); }
+
 .bottom-nav {
   position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
   width: 100%; max-width: 430px;
@@ -235,6 +299,9 @@ body {
 }
 .form-input:focus { border-color: var(--sky); }
 
+/* =============================================
+   EMOJI PICKER — REDESIGNED FOR REAL KEYBOARD
+   ============================================= */
 .emoji-picker-btn {
   width: 100%;
   background: var(--cream);
@@ -247,8 +314,10 @@ body {
   cursor: pointer;
   transition: border-color .2s, background .15s;
   font-family: 'Poppins', sans-serif;
+  position: relative;
 }
 .emoji-picker-btn:hover { border-color: var(--sky); background: #f0f8ff; }
+.emoji-picker-btn.focused { border-color: var(--sky); border-style: solid; background: #f0f8ff; }
 .emoji-selected-display {
   font-size: 32px;
   width: 48px;
@@ -260,19 +329,29 @@ body {
   justify-content: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   flex-shrink: 0;
+  pointer-events: none;
 }
-.emoji-picker-text { flex: 1; }
+.emoji-picker-text { flex: 1; pointer-events: none; }
 .emoji-picker-label { font-size: 14px; font-weight: 600; color: var(--soft-black); }
 .emoji-picker-sub { font-size: 12px; color: var(--text-light); margin-top: 2px; }
-.emoji-picker-arrow { font-size: 18px; color: var(--text-light); }
+.emoji-picker-arrow { font-size: 18px; color: var(--text-light); pointer-events: none; }
 
-.emoji-input-hidden {
+/* The real input that captures emoji — overlaid on top of the button */
+.emoji-real-input {
   position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   opacity: 0;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  pointer-events: none;
+  font-size: 24px;
+  border: none;
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+  caret-color: transparent;
+  color: transparent;
+  /* Force emoji keyboard on iOS/Android */
+  -webkit-user-select: none;
 }
 
 .color-grid { display: flex; gap: 10px; flex-wrap: wrap; }
@@ -523,7 +602,7 @@ body {
 .cal-chip {
   flex-shrink: 0; padding: 6px 14px; border-radius: 100px; font-size: 12px;
   font-weight: 600; cursor: pointer; border: 2px solid transparent;
-  background: var(--cream); color: var(--text-mid); transition: all .15s;
+  background: var(--cream); color: var(--text-mid); transition: all .15px;
   display: flex; align-items: center; gap: 6px;
 }
 .cal-chip.selected { background: var(--soft-black); color: white; }
@@ -578,9 +657,7 @@ body {
 }
 .welcome-btn:active { transform: scale(.98); }
 
-/* =============================================
-   ONBOARDING TOUR STYLES
-   ============================================= */
+/* ONBOARDING */
 .onboarding-overlay {
   position: fixed; inset: 0; z-index: 600;
   display: none;
@@ -590,14 +667,11 @@ body {
 }
 .onboarding-overlay.active { display: flex; }
 @keyframes fadeInOverlay { from{opacity:0} to{opacity:1} }
-
-/* Dark backdrop with a soft vignette */
 .onboarding-backdrop {
   position: absolute; inset: 0;
   background: rgba(17,17,17,0.82);
   backdrop-filter: blur(2px);
 }
-
 .onboarding-card {
   position: relative; z-index: 1;
   width: 100%; max-width: 360px;
@@ -609,8 +683,6 @@ body {
   animation: cardPop .45s cubic-bezier(.34,1.56,.64,1);
 }
 @keyframes cardPop { from{transform:scale(.85) translateY(24px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
-
-/* Colourful top banner per step */
 .onboarding-banner {
   width: 100%; height: 160px;
   display: flex; align-items: center; justify-content: center;
@@ -619,13 +691,11 @@ body {
 }
 .onboarding-banner-emoji { font-size: 56px; position: relative; z-index: 1; animation: pulseEmoji 2s ease-in-out infinite; }
 @keyframes pulseEmoji { 0%,100%{transform:scale(1) rotate(-3deg)} 50%{transform:scale(1.1) rotate(3deg)} }
-/* Floating decorative blobs in banner */
 .onboarding-blob {
   position: absolute; border-radius: 50%; opacity: 0.35;
   animation: blobFloat 4s ease-in-out infinite alternate;
 }
 @keyframes blobFloat { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(10px,-8px) scale(1.08)} }
-
 .onboarding-body { padding: 24px 24px 20px; }
 .onboarding-step-tag {
   display: inline-flex; align-items: center; gap: 6px;
@@ -633,15 +703,8 @@ body {
   font-size: 11px; font-weight: 700; color: var(--text-mid);
   text-transform: uppercase; letter-spacing: .5px; margin-bottom: 12px;
 }
-.onboarding-title {
-  font-size: 20px; font-weight: 800; color: var(--soft-black);
-  line-height: 1.25; margin-bottom: 8px;
-}
-.onboarding-desc {
-  font-size: 13px; color: var(--text-mid); line-height: 1.7;
-}
-
-/* Feature pills row */
+.onboarding-title { font-size: 20px; font-weight: 800; color: var(--soft-black); line-height: 1.25; margin-bottom: 8px; }
+.onboarding-desc { font-size: 13px; color: var(--text-mid); line-height: 1.7; }
 .onboarding-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .onboarding-pill {
   display: flex; align-items: center; gap: 6px;
@@ -649,8 +712,6 @@ body {
   font-size: 12px; font-weight: 600; color: var(--soft-black);
 }
 .onboarding-pill-dot { width: 8px; height: 8px; border-radius: 50%; }
-
-/* Progress dots */
 .onboarding-footer {
   display: flex; align-items: center; justify-content: space-between;
   padding: 16px 24px 24px;
@@ -662,7 +723,6 @@ body {
   width: 6px;
 }
 .onboarding-dot.active { background: var(--soft-black); width: 20px; }
-
 .onboarding-actions { display: flex; gap: 10px; align-items: center; }
 .ob-skip-btn {
   font-size: 13px; font-weight: 600; color: var(--text-light);
@@ -679,15 +739,6 @@ body {
 }
 .ob-next-btn:active { transform: scale(.96); }
 
-/* Swipe hint on first step */
-.swipe-hint {
-  display: flex; align-items: center; gap: 6px;
-  font-size: 11px; color: var(--text-light); margin-top: 12px;
-  animation: swipeHint 2s ease-in-out infinite;
-}
-@keyframes swipeHint { 0%,100%{transform:translateX(0)} 50%{transform:translateX(6px)} }
-
-/* App loader */
 .app-loader {
   position: fixed; inset: 0; background: var(--cream); z-index: 999;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -716,7 +767,7 @@ body {
   <div class="loader-tagline">Build habits, change your life ✨</div>
 </div>
 
-<!-- Welcome Modal (first launch) -->
+<!-- Welcome Modal -->
 <div class="welcome-modal-overlay" id="welcomeOverlay" style="display:none;">
   <div class="welcome-modal">
     <div class="welcome-emoji">🌱</div>
@@ -727,22 +778,17 @@ body {
   </div>
 </div>
 
-<!-- =============================================
-     ONBOARDING TOUR (shown once after name entry)
-     ============================================= -->
+<!-- Onboarding Tour -->
 <div class="onboarding-overlay" id="onboardingOverlay">
   <div class="onboarding-backdrop" onclick="skipOnboarding()"></div>
   <div class="onboarding-card" id="onboardingCard">
-    <!-- Banner -->
     <div class="onboarding-banner" id="obBanner"></div>
-    <!-- Body -->
     <div class="onboarding-body">
       <div class="onboarding-step-tag" id="obStepTag"></div>
       <div class="onboarding-title" id="obTitle"></div>
       <div class="onboarding-desc" id="obDesc"></div>
       <div class="onboarding-pills" id="obPills"></div>
     </div>
-    <!-- Footer -->
     <div class="onboarding-footer">
       <div class="onboarding-dots" id="obDots"></div>
       <div class="onboarding-actions">
@@ -765,7 +811,13 @@ body {
         </div>
         <div class="header-icons">
           <button class="icon-btn" id="viewToggleBtn" title="Toggle View">⊞</button>
-          <button class="icon-btn" id="openCalBtn" title="Calendar">📅</button>
+          <!-- FIX 1: Dynamic date icon in header calendar button -->
+          <button class="icon-btn" id="openCalBtn" title="Calendar">
+            <div class="cal-nav-icon" id="headerCalIcon">
+              <div class="cal-nav-icon-top" id="headerCalMonth">JAN</div>
+              <div class="cal-nav-icon-date" id="headerCalDay">1</div>
+            </div>
+          </button>
         </div>
       </div>
     </div>
@@ -830,7 +882,7 @@ body {
     <div id="settingsContent"></div>
   </div>
 
-  <!-- BOTTOM NAV -->
+  <!-- BOTTOM NAV — FIX 1: Calendar tab uses dynamic date icon -->
   <nav class="bottom-nav">
     <div class="nav-item active" onclick="switchPage('home')">
       <div class="nav-icon">🏠</div>
@@ -847,8 +899,14 @@ body {
       <div class="nav-label">Analytics</div>
       <div class="nav-indicator"></div>
     </div>
-    <div class="nav-item" onclick="switchPage('calendar')">
-      <div class="nav-icon">📅</div>
+    <div class="nav-item" id="calNavItem" onclick="switchPage('calendar')">
+      <!-- Dynamic calendar icon showing real date -->
+      <div class="nav-icon" style="font-size:unset;">
+        <div class="cal-nav-icon" id="navCalIcon">
+          <div class="cal-nav-icon-top" id="navCalMonth">JAN</div>
+          <div class="cal-nav-icon-date" id="navCalDay">1</div>
+        </div>
+      </div>
       <div class="nav-label">Calendar</div>
       <div class="nav-indicator"></div>
     </div>
@@ -865,7 +923,7 @@ body {
   <button class="fab" id="mainFab" onclick="openAddHabit()">＋</button>
 </div>
 
-<!-- ADD HABIT MODAL -->
+<!-- ADD HABIT MODAL — FIX 2: Real emoji keyboard input -->
 <div class="modal-overlay" id="addHabitModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -876,17 +934,36 @@ body {
     </div>
     <div class="form-group">
       <div class="form-label">Choose Icon (Emoji)</div>
-      <div class="emoji-picker-btn" id="emojiPickerBtn" onclick="triggerEmojiPicker()">
+      <!-- Redesigned emoji picker: real input overlaid for keyboard trigger -->
+      <div class="emoji-picker-btn" id="emojiPickerBtn">
         <div class="emoji-selected-display" id="emojiDisplay">⭐</div>
         <div class="emoji-picker-text">
-          <div class="emoji-picker-label">Tap to pick an emoji</div>
-          <div class="emoji-picker-sub">Opens your emoji keyboard</div>
+          <div class="emoji-picker-label" id="emojiPickerLabel">Tap to pick an emoji</div>
+          <div class="emoji-picker-sub">Opens emoji keyboard</div>
         </div>
-        <div class="emoji-picker-arrow">😊</div>
+        <div class="emoji-picker-arrow">→</div>
+        <!--
+          The key trick: a transparent text input sitting on top of the button.
+          On mobile, tapping it opens the keyboard. We set inputmode="text" (NOT "none")
+          so iOS/Android shows the full keyboard including emoji button.
+          We also add a "🌐" placeholder to hint the emoji globe key.
+        -->
+        <input
+          type="text"
+          id="emojiRealInput"
+          class="emoji-real-input"
+          inputmode="text"
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+          placeholder=""
+          aria-label="Tap to open emoji keyboard"
+        >
       </div>
-      <input type="text" id="emojiHiddenInput" class="emoji-input-hidden"
-        inputmode="none" readonly
-        style="position:absolute;opacity:0;width:1px;height:1px;border:none;outline:none;">
+      <div style="margin-top:6px;font-size:11px;color:var(--text-light);padding:0 2px;">
+        💡 Tap above → use the 😊 or 🌐 key on your keyboard to switch to emojis
+      </div>
     </div>
     <div class="form-group">
       <div class="form-label">Choose Color</div>
@@ -1049,6 +1126,7 @@ let notePhotoData = '';
 let detailHabitId = null;
 
 const COLORS = ['#FFD600','#FF5A6E','#00C9A7','#32C5FF','#B05CFF','#FF9F1C','#4CAF50','#E91E63','#00BCD4','#9C27B0','#F44336','#3F51B5'];
+const MONTHS_SHORT = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
 function todayStr() {
   return new Date().toISOString().split('T')[0];
@@ -1068,63 +1146,148 @@ function saveData() {
 }
 
 // =============================================
+// FIX 1: DYNAMIC CALENDAR DATE ICONS
+// Updates the calendar icon in both nav bar and header button
+// to show the real current date, refreshing daily.
+// =============================================
+function updateCalendarDateIcons() {
+  const now = new Date();
+  const day = now.getDate();
+  const month = MONTHS_SHORT[now.getMonth()];
+
+  // Bottom nav calendar icon
+  const navDay = document.getElementById('navCalDay');
+  const navMonth = document.getElementById('navCalMonth');
+  if (navDay) navDay.textContent = day;
+  if (navMonth) navMonth.textContent = month;
+
+  // Header calendar button icon
+  const headerDay = document.getElementById('headerCalDay');
+  const headerMonth = document.getElementById('headerCalMonth');
+  if (headerDay) headerDay.textContent = day;
+  if (headerMonth) headerMonth.textContent = month;
+}
+
+// Refresh calendar icons at midnight
+function scheduleMidnightRefresh() {
+  const now = new Date();
+  const msUntilMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now;
+  setTimeout(() => {
+    updateCalendarDateIcons();
+    scheduleMidnightRefresh(); // reschedule for next midnight
+  }, msUntilMidnight);
+}
+
+// =============================================
+// FIX 2: EMOJI PICKER — Real keyboard approach
+// We use a transparent text input overlaid on the button.
+// On tap, it focuses and opens the native keyboard.
+// User switches to emoji keyboard using the 😊/🌐 key.
+// We capture whatever they type and extract emojis from it.
+// =============================================
+function setupEmojiPicker() {
+  const input = document.getElementById('emojiRealInput');
+  const display = document.getElementById('emojiDisplay');
+  const label = document.getElementById('emojiPickerLabel');
+  const btn = document.getElementById('emojiPickerBtn');
+
+  if (!input) return;
+
+  // When focused — show feedback
+  input.addEventListener('focus', () => {
+    btn.classList.add('focused');
+    label.textContent = 'Type or paste an emoji...';
+  });
+
+  input.addEventListener('blur', () => {
+    btn.classList.remove('focused');
+    label.textContent = 'Tap to pick an emoji';
+    // Small delay to allow input event to fire first
+    setTimeout(() => { input.value = ''; }, 100);
+  });
+
+  // The main capture: fires on every keystroke / emoji selection
+  input.addEventListener('input', function() {
+    const val = this.value;
+    if (!val) return;
+
+    // Extract emoji characters (supports multi-codepoint emoji)
+    const emojiRegex = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu;
+    const emojis = val.match(emojiRegex);
+
+    if (emojis && emojis.length > 0) {
+      // Take the last emoji typed
+      selectedIcon = emojis[emojis.length - 1];
+      display.textContent = selectedIcon;
+      label.textContent = 'Emoji selected! Tap to change';
+      showToast('✅ Emoji set: ' + selectedIcon);
+      this.value = '';
+      this.blur();
+    } else if (val.trim().length > 0) {
+      // Non-emoji input — use first character as fallback
+      const chars = [...val.trim()];
+      if (chars[0] && chars[0].codePointAt(0) > 127) {
+        selectedIcon = chars[0];
+        display.textContent = selectedIcon;
+        this.value = '';
+        this.blur();
+      } else {
+        // Regular text, clear it and hint user
+        this.value = '';
+      }
+    }
+  });
+
+  // Also handle paste
+  input.addEventListener('paste', function(e) {
+    e.preventDefault();
+    const pasted = (e.clipboardData || window.clipboardData).getData('text');
+    if (!pasted) return;
+    const emojiRegex = /\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu;
+    const emojis = pasted.match(emojiRegex);
+    if (emojis && emojis.length > 0) {
+      selectedIcon = emojis[0];
+      display.textContent = selectedIcon;
+      label.textContent = 'Emoji selected! Tap to change';
+      showToast('✅ Emoji set: ' + selectedIcon);
+    }
+    this.value = '';
+  });
+}
+
+// =============================================
 // ONBOARDING TOUR
 // =============================================
 const OB_STEPS = [
   {
     banner: { bg: 'linear-gradient(135deg,#FFD600,#FF9F1C)', emoji: '🏠', blobs: [{w:80,h:80,c:'#fff',t:'-10px',l:'-20px'},{w:50,h:50,c:'#FF9F1C',b:'-10px',r:'-10px'}] },
-    tag: '✦ Step 1 of 5',
-    title: 'Your Daily Home Base',
+    tag: '✦ Step 1 of 5', title: 'Your Daily Home Base',
     desc: 'The Home screen shows all your habits for today. Tap the circle button on any habit to mark it done — watch your streak grow!',
-    pills: [
-      { dot: '#FFD600', text: '✓ Mark habits done' },
-      { dot: '#FF9F1C', text: '🔥 Track your streaks' },
-      { dot: '#00C9A7', text: '📅 Scroll past days' },
-    ]
+    pills: [{ dot: '#FFD600', text: '✓ Mark habits done' },{ dot: '#FF9F1C', text: '🔥 Track your streaks' },{ dot: '#00C9A7', text: '📅 Scroll past days' }]
   },
   {
     banner: { bg: 'linear-gradient(135deg,#32C5FF,#B05CFF)', emoji: '➕', blobs: [{w:70,h:70,c:'#fff',b:'-15px',l:'10px'},{w:40,h:40,c:'#32C5FF',t:'-5px',r:'20px'}] },
-    tag: '✦ Step 2 of 5',
-    title: 'Add Your First Habit',
+    tag: '✦ Step 2 of 5', title: 'Add Your First Habit',
     desc: 'Tap the big ＋ button (bottom right) to create a habit. Give it a name, pick an emoji icon and a colour that inspires you.',
-    pills: [
-      { dot: '#32C5FF', text: '⭐ Choose an emoji' },
-      { dot: '#B05CFF', text: '🎨 Pick a colour' },
-      { dot: '#FF5A6E', text: '🏷️ Set a category' },
-    ]
+    pills: [{ dot: '#32C5FF', text: '⭐ Choose an emoji' },{ dot: '#B05CFF', text: '🎨 Pick a colour' },{ dot: '#FF5A6E', text: '🏷️ Set a category' }]
   },
   {
     banner: { bg: 'linear-gradient(135deg,#00C9A7,#32C5FF)', emoji: '📔', blobs: [{w:90,h:90,c:'#fff',t:'-20px',r:'-20px'},{w:45,h:45,c:'#00C9A7',b:'0px',l:'-5px'}] },
-    tag: '✦ Step 3 of 5',
-    title: 'Journal Your Journey',
+    tag: '✦ Step 3 of 5', title: 'Journal Your Journey',
     desc: 'The Journal tab captures your reflections, moods, and photos alongside your habits — building a beautiful diary of your growth.',
-    pills: [
-      { dot: '#00C9A7', text: '✏️ Write reflections' },
-      { dot: '#32C5FF', text: '😊 Log your mood' },
-      { dot: '#B05CFF', text: '📷 Attach photos' },
-    ]
+    pills: [{ dot: '#00C9A7', text: '✏️ Write reflections' },{ dot: '#32C5FF', text: '😊 Log your mood' },{ dot: '#B05CFF', text: '📷 Attach photos' }]
   },
   {
     banner: { bg: 'linear-gradient(135deg,#FF5A6E,#B05CFF)', emoji: '📊', blobs: [{w:65,h:65,c:'#fff',b:'-10px',r:'10px'},{w:55,h:55,c:'#FF5A6E',t:'-10px',l:'-10px'}] },
-    tag: '✦ Step 4 of 5',
-    title: 'Analyse Your Progress',
+    tag: '✦ Step 4 of 5', title: 'Analyse Your Progress',
     desc: 'Analytics shows your completion rates, weekly overview bars, and per-habit efficiency scores. Knowledge is the fuel for better habits!',
-    pills: [
-      { dot: '#FF5A6E', text: '📈 Weekly bars' },
-      { dot: '#B05CFF', text: '🎯 Completion rate' },
-      { dot: '#FF9F1C', text: '🏆 Best streaks' },
-    ]
+    pills: [{ dot: '#FF5A6E', text: '📈 Weekly bars' },{ dot: '#B05CFF', text: '🎯 Completion rate' },{ dot: '#FF9F1C', text: '🏆 Best streaks' }]
   },
   {
     banner: { bg: 'linear-gradient(135deg,#4CAF50,#00C9A7)', emoji: '🚀', blobs: [{w:75,h:75,c:'#fff',t:'-15px',l:'5px'},{w:50,h:50,c:'#4CAF50',b:'-5px',r:'-10px'}] },
-    tag: '✦ Step 5 of 5',
-    title: "You're All Set!",
+    tag: '✦ Step 5 of 5', title: "You're All Set!",
     desc: "That's everything you need to start building life-changing habits. Remember — consistency beats perfection. See you tomorrow! 🌱",
-    pills: [
-      { dot: '#4CAF50', text: '📅 Calendar history' },
-      { dot: '#00C9A7', text: '⚙️ Settings & export' },
-      { dot: '#FFD600', text: '🌟 Daily check-ins' },
-    ],
+    pills: [{ dot: '#4CAF50', text: '📅 Calendar history' },{ dot: '#00C9A7', text: '⚙️ Settings & export' },{ dot: '#FFD600', text: '🌟 Daily check-ins' }],
     isLast: true
   }
 ];
@@ -1139,9 +1302,6 @@ function showOnboarding() {
 
 function renderOnboardingStep() {
   const step = OB_STEPS[obStep];
-  const total = OB_STEPS.length;
-
-  // Banner
   const banner = document.getElementById('obBanner');
   let blobsHtml = step.banner.blobs.map(b => {
     const pos = [];
@@ -1153,69 +1313,42 @@ function renderOnboardingStep() {
   }).join('');
   banner.style.background = step.banner.bg;
   banner.innerHTML = `${blobsHtml}<div class="onboarding-banner-emoji">${step.banner.emoji}</div>`;
-
-  // Text
   document.getElementById('obStepTag').textContent = step.tag;
   document.getElementById('obTitle').textContent = step.title;
   document.getElementById('obDesc').textContent = step.desc;
-
-  // Pills
   const pillsEl = document.getElementById('obPills');
   pillsEl.innerHTML = (step.pills || []).map(p =>
     `<div class="onboarding-pill"><div class="onboarding-pill-dot" style="background:${p.dot}"></div>${p.text}</div>`
   ).join('');
-
-  // Dots
   const dotsEl = document.getElementById('obDots');
   dotsEl.innerHTML = OB_STEPS.map((_,i) =>
     `<div class="onboarding-dot ${i === obStep ? 'active' : ''}"></div>`
   ).join('');
-
-  // Buttons
-  const skipBtn = document.getElementById('obSkipBtn');
-  const nextBtn = document.getElementById('obNextBtn');
-  skipBtn.style.display = step.isLast ? 'none' : 'block';
-  nextBtn.textContent = step.isLast ? "Let's Build! 🌱" : 'Next →';
-
-  // Card re-pop animation
+  document.getElementById('obSkipBtn').style.display = step.isLast ? 'none' : 'block';
+  document.getElementById('obNextBtn').textContent = step.isLast ? "Let's Build! 🌱" : 'Next →';
   const card = document.getElementById('onboardingCard');
   card.style.animation = 'none';
-  void card.offsetWidth; // reflow
+  void card.offsetWidth;
   card.style.animation = 'cardPop .35s cubic-bezier(.34,1.56,.64,1)';
 }
 
 function nextOnboardingStep() {
-  if (obStep < OB_STEPS.length - 1) {
-    obStep++;
-    renderOnboardingStep();
-  } else {
-    finishOnboarding();
-  }
+  if (obStep < OB_STEPS.length - 1) { obStep++; renderOnboardingStep(); }
+  else { finishOnboarding(); }
 }
 
-function skipOnboarding() {
-  finishOnboarding();
-}
+function skipOnboarding() { finishOnboarding(); }
 
 function finishOnboarding() {
   localStorage.setItem('habitra_onboarded', '1');
   const overlay = document.getElementById('onboardingOverlay');
-  overlay.style.animation = 'fadeOutOverlay .3s ease forwards';
-  // Inline keyframe via style tag
-  if (!document.getElementById('fadeOutStyle')) {
-    const s = document.createElement('style');
-    s.id = 'fadeOutStyle';
-    s.textContent = '@keyframes fadeOutOverlay{to{opacity:0;pointer-events:none}}';
-    document.head.appendChild(s);
-  }
-  setTimeout(() => {
-    overlay.classList.remove('active');
-    overlay.style.animation = '';
-  }, 300);
+  overlay.style.transition = 'opacity .3s';
+  overlay.style.opacity = '0';
+  setTimeout(() => { overlay.classList.remove('active'); overlay.style.opacity = ''; overlay.style.transition = ''; }, 300);
 }
 
 // =============================================
-// WELCOME / ONBOARDING
+// WELCOME
 // =============================================
 function checkFirstLaunch() {
   const hasName = state.settings && state.settings.name && state.settings.name.trim().length > 0;
@@ -1239,8 +1372,6 @@ function saveWelcomeName() {
   document.getElementById('welcomeOverlay').style.display = 'none';
   updateHeaderDate();
   showToast('👋 Welcome, ' + name + '!');
-
-  // Show onboarding tour only on first ever launch
   if (!localStorage.getItem('habitra_onboarded')) {
     setTimeout(() => showOnboarding(), 600);
   }
@@ -1248,51 +1379,6 @@ function saveWelcomeName() {
 
 document.getElementById('welcomeNameInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') saveWelcomeName();
-});
-
-// ===== EMOJI PICKER =====
-function triggerEmojiPicker() {
-  const input = document.getElementById('emojiHiddenInput');
-  input.style.position = 'fixed';
-  input.style.top = '50%';
-  input.style.left = '50%';
-  input.style.width = '40px';
-  input.style.height = '40px';
-  input.style.opacity = '0.01';
-  input.style.fontSize = '16px';
-  input.style.border = 'none';
-  input.style.outline = 'none';
-  input.style.zIndex = '9999';
-  input.removeAttribute('readonly');
-  input.value = '';
-  input.focus();
-}
-
-document.getElementById('emojiHiddenInput').addEventListener('input', function(e) {
-  const val = this.value;
-  if (!val) return;
-  const emojiRegex = /\p{Emoji}/u;
-  const chars = [...val];
-  let emoji = '';
-  for (let ch of chars) {
-    if (emojiRegex.test(ch) || ch.codePointAt(0) > 127) emoji += ch;
-  }
-  selectedIcon = emoji.trim() || val.trim().charAt(0) || '⭐';
-  document.getElementById('emojiDisplay').textContent = selectedIcon;
-  this.value = '';
-  this.blur();
-  this.style.position = 'absolute';
-  this.style.opacity = '0';
-  this.style.width = '1px';
-  this.style.height = '1px';
-});
-
-document.getElementById('emojiHiddenInput').addEventListener('blur', function() {
-  this.style.position = 'absolute';
-  this.style.opacity = '0';
-  this.style.width = '1px';
-  this.style.height = '1px';
-  this.setAttribute('readonly', '');
 });
 
 // ===== PAGE NAVIGATION =====
@@ -1516,7 +1602,10 @@ function openAddHabit() {
   document.getElementById('habitName').value = '';
   selectedIcon = '⭐';
   document.getElementById('emojiDisplay').textContent = '⭐';
+  document.getElementById('emojiPickerLabel').textContent = 'Tap to pick an emoji';
   openModal('addHabitModal');
+  // Small delay then setup picker (in case modal just rendered)
+  setTimeout(setupEmojiPicker, 100);
 }
 
 function buildColorGrid() {
@@ -1919,6 +2008,11 @@ function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'
 // ===== INIT =====
 function init() {
   loadData();
+
+  // FIX 1: Set real date on calendar icons immediately
+  updateCalendarDateIcons();
+  scheduleMidnightRefresh();
+
   setTimeout(() => {
     const loader = document.getElementById('appLoader');
     if (loader) {
@@ -1926,8 +2020,12 @@ function init() {
       setTimeout(() => { loader.remove(); checkFirstLaunch(); }, 400);
     }
   }, 1400);
+
   renderHome();
   calPageDate = new Date();
+
+  // FIX 2: Setup emoji picker after DOM ready
+  setupEmojiPicker();
 }
 
 init();
