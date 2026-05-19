@@ -198,7 +198,7 @@ body {
   width: 26px;
   height: 26px;
   border-radius: 5px;
-  border: 2px solid currentColor;
+  border: none;
   overflow: hidden;
   line-height: 1;
   flex-shrink: 0;
@@ -226,10 +226,6 @@ body {
 .nav-item .cal-nav-icon {
   width: 24px;
   height: 24px;
-  border-color: var(--text-light);
-}
-.nav-item.active .cal-nav-icon {
-  border-color: var(--soft-black);
 }
 .nav-item .cal-nav-icon-top {
   font-size: 4.5px;
@@ -244,7 +240,6 @@ body {
 
 /* Small header cal button icon */
 .icon-btn .cal-nav-icon {
-  border-color: var(--text-mid);
   width: 20px;
   height: 20px;
 }
@@ -1173,8 +1168,14 @@ function scheduleMidnightRefresh() {
   const now = new Date();
   const msUntilMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1) - now;
   setTimeout(() => {
+    // Update everything for the new day
     updateCalendarDateIcons();
-    scheduleMidnightRefresh(); // reschedule for next midnight
+    state.selectedDate = todayStr();   // reset selected date to new today
+    calPageDate = new Date();          // reset calendar page to current month
+    renderDaySelector();
+    renderHome();
+    updateHeaderDate();
+    scheduleMidnightRefresh();         // reschedule for next midnight
   }, msUntilMidnight);
 }
 
@@ -2012,6 +2013,17 @@ function init() {
   // FIX 1: Set real date on calendar icons immediately
   updateCalendarDateIcons();
   scheduleMidnightRefresh();
+  // Also refresh icons every minute in case device wakes from sleep past midnight
+  setInterval(() => {
+    updateCalendarDateIcons();
+    if (todayStr() !== state.selectedDate && state.selectedDate === dateStr(new Date(Date.now() - 86400000))) {
+      // Day has changed, refresh home
+      state.selectedDate = todayStr();
+      renderDaySelector();
+      renderHome();
+      updateHeaderDate();
+    }
+  }, 60000);
 
   setTimeout(() => {
     const loader = document.getElementById('appLoader');
