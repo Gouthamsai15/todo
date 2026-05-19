@@ -2009,6 +2009,7 @@ function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;'
 // ===== INIT =====
 function init() {
   loadData();
+  state.selectedDate = todayStr(); // Always reset to today on app start
 
   // FIX 1: Set real date on calendar icons immediately
   updateCalendarDateIcons();
