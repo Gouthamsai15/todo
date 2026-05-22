@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>HABITRA – Habit Tracker & Journal</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
 :root {
   --cream: #F5F1E8;
@@ -751,6 +752,89 @@ body {
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-thumb { background: var(--cream2); border-radius: 4px; }
+
+/* =============================================
+   EMAIL / WEEKLY REPORT STYLES
+   ============================================= */
+.email-settings-card {
+  background: var(--white); margin: 0 16px 16px;
+  border-radius: var(--radius-xl); padding: 20px;
+  box-shadow: var(--shadow-card);
+}
+.email-section-title {
+  font-size: 15px; font-weight: 700; color: var(--soft-black);
+  margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+}
+.email-input-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.email-input-label { font-size: 11px; font-weight: 700; color: var(--text-light); text-transform: uppercase; letter-spacing: .5px; }
+.email-input-field {
+  width: 100%; background: var(--cream); border: 2px solid transparent;
+  border-radius: var(--radius-md); padding: 12px 14px;
+  font-size: 14px; font-family: 'Poppins', sans-serif; color: var(--soft-black);
+  outline: none; transition: border-color .2s;
+}
+.email-input-field:focus { border-color: var(--sky); }
+.email-toggle-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 0; border-top: 1px solid var(--cream);
+}
+.email-toggle-label { font-size: 13px; font-weight: 600; color: var(--soft-black); }
+.email-toggle-sub { font-size: 11px; color: var(--text-light); margin-top: 2px; }
+.btn-send-report {
+  width: 100%; background: linear-gradient(135deg, var(--teal), var(--sky));
+  color: white; border: none; border-radius: 100px; padding: 15px;
+  font-size: 14px; font-weight: 700; font-family: 'Poppins', sans-serif;
+  cursor: pointer; margin-top: 16px; display: flex; align-items: center;
+  justify-content: center; gap: 8px; transition: opacity .2s, transform .15s;
+  box-shadow: 0 4px 16px rgba(0,201,167,0.3);
+}
+.btn-send-report:active { transform: scale(.98); }
+.btn-send-report:disabled { opacity: .6; cursor: not-allowed; }
+.btn-save-email {
+  width: 100%; background: var(--soft-black); color: white; border: none;
+  border-radius: 100px; padding: 13px;
+  font-size: 14px; font-weight: 700; font-family: 'Poppins', sans-serif;
+  cursor: pointer; transition: transform .15s;
+}
+.btn-save-email:active { transform: scale(.98); }
+
+/* Weekly Analytics Preview */
+.weekly-report-preview {
+  background: var(--white); margin: 0 16px 16px;
+  border-radius: var(--radius-xl); padding: 20px;
+  box-shadow: var(--shadow-card);
+}
+.report-stat-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+.report-stat-box {
+  background: var(--cream); border-radius: var(--radius-lg); padding: 14px 12px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.report-stat-val { font-size: 22px; font-weight: 800; color: var(--soft-black); }
+.report-stat-lbl { font-size: 11px; color: var(--text-light); font-weight: 500; }
+.report-progress-bar-bg {
+  width: 100%; height: 10px; background: var(--cream);
+  border-radius: 100px; overflow: hidden; margin: 8px 0;
+}
+.report-progress-bar-fill {
+  height: 100%; border-radius: 100px;
+  background: linear-gradient(90deg, var(--teal), var(--sky));
+  transition: width .6s cubic-bezier(.34,1.56,.64,1);
+}
+.report-habit-row {
+  display: flex; align-items: center; gap: 10px; padding: 8px 0;
+  border-top: 1px solid var(--cream);
+}
+.report-habit-tag {
+  display: inline-flex; align-items: center; gap: 4px;
+  background: var(--cream); border-radius: 100px;
+  padding: 4px 10px; font-size: 11px; font-weight: 600; color: var(--soft-black);
+}
+.spinner {
+  width: 16px; height: 16px; border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white; border-radius: 50%;
+  animation: spin .7s linear infinite; display: inline-block;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
@@ -1376,6 +1460,7 @@ function saveWelcomeName() {
   if (!localStorage.getItem('habitra_onboarded')) {
     setTimeout(() => showOnboarding(), 600);
   }
+  requestNotifPermission();
 }
 
 document.getElementById('welcomeNameInput').addEventListener('keydown', e => {
@@ -1912,9 +1997,13 @@ function renderSettings() {
     <div class="settings-section"><div class="settings-group"><div class="settings-item" onclick="showOnboarding()"><div class="settings-item-icon" style="background:#32C5FF22;">🧭</div><div class="settings-item-info"><div class="settings-item-name">App Tour</div><div class="settings-item-desc">Replay the how-it-works walkthrough</div></div><div class="settings-item-right">›</div></div></div></div>
     <div class="settings-section-label">Data</div>
     <div class="settings-section"><div class="settings-group"><div class="settings-item" onclick="exportData()"><div class="settings-item-icon" style="background:#00C9A722;">📤</div><div class="settings-item-info"><div class="settings-item-name">Export Data</div><div class="settings-item-desc">Download your habit data as JSON</div></div><div class="settings-item-right">›</div></div><div class="settings-item" onclick="clearAllDataConfirm()"><div class="settings-item-icon" style="background:#FF5A6E22;">🗑️</div><div class="settings-item-info"><div class="settings-item-name">Clear All Data</div><div class="settings-item-desc">Reset the app completely</div></div><div class="settings-item-right">›</div></div></div></div>
+    <div class="settings-section-label">📧 Weekly Email Reports</div>
+    <div id="emailSettingsSection"></div>
     <div class="settings-section-label">About</div>
     <div class="settings-section"><div class="settings-group"><div class="settings-item"><div class="settings-item-icon" style="background:#B05CFF22;">✨</div><div class="settings-item-info"><div class="settings-item-name">HABITRA</div><div class="settings-item-desc">Build habits, change your life — v2.0</div></div></div></div></div>
     <div style="height:24px"></div>`;
+  renderEmailSettings();
+  setTimeout(() => renderEmailSettings(), 0);
 }
 
 function openNameEdit() { document.getElementById('profileNameInput').value = state.settings.name || ''; openModal('nameModal'); }
@@ -2006,9 +2095,442 @@ document.getElementById('openCalBtn').onclick = () => switchPage('calendar');
 // ===== UTIL =====
 function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+// =============================================
+// HABITRA WEEKLY EMAIL REPORT SYSTEM
+// =============================================
+
+const EMAILJS_SERVICE = 'service_f8dwxl8';
+const EMAILJS_TEMPLATE = 'template_7k4j7rj';
+const EMAILJS_PUBLIC_KEY = 'vwhZI2vaixnOQf2gb';
+
+// Init EmailJS
+(function() {
+  if (window.emailjs) emailjs.init(EMAILJS_PUBLIC_KEY);
+})();
+
+// ---- HELPERS ----
+function getWeekStart() {
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun
+  const diff = now.getDate() - day;
+  const monday = new Date(now.setDate(diff));
+  return dateStr(monday);
+}
+
+function getWeekDates() {
+  const dates = [];
+  const today = new Date();
+  const day = today.getDay();
+  const startOfWeek = new Date(today);
+  startOfWeek.setDate(today.getDate() - day);
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(startOfWeek);
+    d.setDate(startOfWeek.getDate() + i);
+    dates.push(dateStr(d));
+  }
+  return dates;
+}
+
+// ---- ANALYTICS CALCULATOR ----
+function generateWeeklyReport() {
+  const weekDates = getWeekDates();
+  const habits = state.habits;
+
+  if (habits.length === 0) return null;
+
+  // Total possible completions this week (only past/today days)
+  const todayD = todayStr();
+  const pastDates = weekDates.filter(d => d <= todayD);
+  const totalPossible = habits.length * pastDates.length;
+
+  // Completed this week
+  let completedThisWeek = 0;
+  const dailyCounts = {};
+  weekDates.forEach(d => { dailyCounts[d] = 0; });
+
+  habits.forEach(h => {
+    pastDates.forEach(d => {
+      if (state.completions[h.id + '_' + d]) {
+        completedThisWeek++;
+        dailyCounts[d]++;
+      }
+    });
+  });
+
+  // Missed days (days where 0 habits completed)
+  const missedDays = pastDates.filter(d => dailyCounts[d] === 0).length;
+
+  // Weekly consistency %
+  const weeklyConsistency = totalPossible > 0
+    ? Math.round((completedThisWeek / totalPossible) * 100)
+    : 0;
+
+  // Current highest streak (across all habits)
+  const currentStreak = habits.length > 0
+    ? Math.max(...habits.map(h => calcStreak(h.id)))
+    : 0;
+
+  // Best streak ever
+  const maxStreak = habits.length > 0
+    ? Math.max(...habits.map(h => calcBestStreak(h.id)))
+    : 0;
+
+  // Productivity score (weighted: completion rate + streak bonus)
+  const streakBonus = Math.min(currentStreak * 2, 20);
+  const productivityScore = Math.min(100, Math.round(weeklyConsistency * 0.8 + streakBonus));
+
+  // Weekly improvement % (compare to previous week)
+  const prevWeekDates = weekDates.map(d => {
+    const nd = new Date(d + 'T00:00:00');
+    nd.setDate(nd.getDate() - 7);
+    return dateStr(nd);
+  });
+  let prevCompleted = 0;
+  habits.forEach(h => prevWeekDates.forEach(d => { if (state.completions[h.id + '_' + d]) prevCompleted++; }));
+  const weeklyImprovement = prevCompleted > 0
+    ? Math.round(((completedThisWeek - prevCompleted) / prevCompleted) * 100)
+    : (completedThisWeek > 0 ? 100 : 0);
+
+  // Top performing habits (by efficiency this week)
+  const habitPerf = habits.map(h => {
+    const done = pastDates.filter(d => state.completions[h.id + '_' + d]).length;
+    const pct = pastDates.length > 0 ? Math.round((done / pastDates.length) * 100) : 0;
+    return { ...h, weekPct: pct, weekDone: done };
+  }).sort((a, b) => b.weekPct - a.weekPct);
+
+  const topHabits = habitPerf.filter(h => h.weekPct >= 50);
+  const needsAttention = habitPerf.filter(h => h.weekPct < 50);
+
+  // Motivational message
+  const motivations = [
+    "You're building something great — one habit at a time! 🌱",
+    "Consistency is your superpower. Keep showing up! 💪",
+    "Every completed habit is a vote for the person you're becoming. 🗳️",
+    "Small actions, compounded daily, create extraordinary results. 🚀",
+    "The fact you're tracking means you're already ahead. Keep going! ⭐"
+  ];
+  const motivation = motivations[Math.floor(Math.random() * motivations.length)];
+
+  return {
+    completedThisWeek,
+    totalPossible,
+    weeklyConsistency,
+    currentStreak,
+    maxStreak,
+    missedDays,
+    productivityScore,
+    weeklyImprovement,
+    topHabits,
+    needsAttention,
+    dailyCounts,
+    motivation,
+    habitPerf,
+    totalHabits: habits.length,
+    weekDates,
+    pastDates
+  };
+}
+
+// ---- EMAIL SENDER ----
+async function sendWeeklyReportEmail(report, isManual = false) {
+  const userEmail = localStorage.getItem('habitra_email') || '';
+  const userName = state.settings.name || 'Habitra User';
+
+  if (!userEmail) {
+    showToast('❗ Please save your email address first');
+    return false;
+  }
+
+  if (!report) {
+    showToast('📊 Create some habits first!');
+    return false;
+  }
+
+  if (!window.emailjs) {
+    showToast('⚠️ EmailJS not loaded. Check connection.');
+    return false;
+  }
+
+  // Build top habits string
+  const topHabitsStr = report.topHabits.length > 0
+    ? report.topHabits.slice(0, 3).map(h => `${h.icon} ${h.name} (${h.weekPct}%)`).join(', ')
+    : 'Keep building your streaks!';
+
+  // Build needs attention string
+  const attentionStr = report.needsAttention.length > 0
+    ? report.needsAttention.slice(0, 2).map(h => `${h.icon} ${h.name}`).join(', ')
+    : 'All habits on track!';
+
+  const params = {
+    user_name: userName,
+    user_email: userEmail,
+    completed: report.completedThisWeek,
+    streak: report.currentStreak,
+    max_streak: report.maxStreak,
+    missed: report.missedDays,
+    productivity: report.productivityScore,
+    consistency: report.weeklyConsistency,
+    total_habits: report.totalHabits,
+    improvement: report.weeklyImprovement >= 0 ? '+' + report.weeklyImprovement + '%' : report.weeklyImprovement + '%',
+    top_habits: topHabitsStr,
+    needs_attention: attentionStr,
+    motivation: report.motivation,
+    week_start: new Date(report.weekDates[0] + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    week_end: new Date(report.weekDates[6] + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  };
+
+  try {
+    await emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, params);
+    if (!isManual) {
+      localStorage.setItem('lastWeeklyMailSent', getWeekStart());
+      localStorage.setItem('weeklyReportData', JSON.stringify({ sentAt: Date.now(), report: { completedThisWeek: report.completedThisWeek, productivityScore: report.productivityScore } }));
+    }
+    return true;
+  } catch (err) {
+    console.error('EmailJS error:', err);
+    throw err;
+  }
+}
+
+// ---- AUTO SUNDAY CHECKER ----
+function checkAndSendWeeklyMail() {
+  // Ask for notification permission if not yet asked
+  if ('Notification' in window && Notification.permission === 'default') {
+    requestNotifPermission();
+  }
+
+  const weeklyEnabled = localStorage.getItem('weeklyMailEnabled') === 'true';
+  const userEmail = localStorage.getItem('habitra_email') || '';
+  if (!weeklyEnabled || !userEmail) return;
+
+  const today = new Date();
+  if (today.getDay() !== 0) return; // Only on Sunday
+
+  const lastSent = localStorage.getItem('lastWeeklyMailSent');
+  const thisWeekStart = getWeekStart();
+  if (lastSent === thisWeekStart) return; // Already sent this week
+
+  if (state.habits.length === 0) return; // No habits yet
+
+  const report = generateWeeklyReport();
+  if (!report) return;
+
+  sendWeeklyReportEmail(report, false).then(success => {
+    if (success) {
+      setTimeout(() => showToast('📧 Weekly report sent automatically! 🎉'), 2000);
+    }
+  }).catch(() => {});
+}
+
+// ---- RENDER EMAIL SETTINGS ----
+function renderEmailSettings() {
+  const container = document.getElementById('emailSettingsSection');
+  if (!container) return;
+
+  const savedEmail = localStorage.getItem('habitra_email') || '';
+  const weeklyEnabled = localStorage.getItem('weeklyMailEnabled') === 'true';
+  const lastSent = localStorage.getItem('lastWeeklyMailSent');
+  (() => { try { return JSON.parse(localStorage.getItem('weeklyReportData') || '{}'); } catch { return {}; } })();
+
+  const report = generateWeeklyReport();
+
+  let reportPreviewHtml = '';
+  if (report) {
+    reportPreviewHtml = `
+      <div class="weekly-report-preview">
+        <div class="email-section-title">📊 This Week's Preview</div>
+        <div class="report-stat-row">
+          <div class="report-stat-box">
+            <div class="report-stat-val" style="color:var(--teal)">${report.completedThisWeek}</div>
+            <div class="report-stat-lbl">✅ Completed</div>
+          </div>
+          <div class="report-stat-box">
+            <div class="report-stat-val" style="color:var(--orange)">${report.currentStreak}</div>
+            <div class="report-stat-lbl">🔥 Current Streak</div>
+          </div>
+          <div class="report-stat-box">
+            <div class="report-stat-val" style="color:var(--coral)">${report.missedDays}</div>
+            <div class="report-stat-lbl">❌ Missed Days</div>
+          </div>
+          <div class="report-stat-box">
+            <div class="report-stat-val" style="color:var(--purple)">${report.productivityScore}%</div>
+            <div class="report-stat-lbl">📈 Productivity</div>
+          </div>
+        </div>
+        <div style="font-size:12px;font-weight:600;color:var(--text-mid);margin-bottom:6px;">Weekly Consistency</div>
+        <div class="report-progress-bar-bg">
+          <div class="report-progress-bar-fill" style="width:${report.weeklyConsistency}%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text-light);">
+          <span>0%</span><span style="font-weight:700;color:var(--soft-black)">${report.weeklyConsistency}%</span><span>100%</span>
+        </div>
+        ${report.topHabits.length > 0 ? `
+        <div style="margin-top:14px;">
+          <div style="font-size:12px;font-weight:700;color:var(--text-mid);margin-bottom:8px;">🏆 TOP HABITS</div>
+          ${report.topHabits.slice(0,3).map(h => `
+            <div class="report-habit-row">
+              <div style="font-size:20px">${h.icon}</div>
+              <div style="flex:1;font-size:13px;font-weight:600;color:var(--soft-black)">${escHtml(h.name)}</div>
+              <div class="report-habit-tag" style="background:${h.color}22;color:${h.color}">${h.weekPct}%</div>
+            </div>`).join('')}
+        </div>` : ''}
+        ${report.needsAttention.length > 0 ? `
+        <div style="margin-top:10px;">
+          <div style="font-size:12px;font-weight:700;color:var(--coral);margin-bottom:8px;">⚠️ NEEDS ATTENTION</div>
+          ${report.needsAttention.slice(0,2).map(h => `
+            <div class="report-habit-row">
+              <div style="font-size:20px">${h.icon}</div>
+              <div style="flex:1;font-size:13px;font-weight:600;color:var(--soft-black)">${escHtml(h.name)}</div>
+              <div class="report-habit-tag">${h.weekPct}%</div>
+            </div>`).join('')}
+        </div>` : ''}
+        ${lastSent ? `<div style="margin-top:12px;font-size:11px;color:var(--text-light);text-align:center;">Last report sent: week of ${lastSent}</div>` : ''}
+      </div>`;
+  } else {
+    reportPreviewHtml = `
+      <div class="weekly-report-preview">
+        <div style="text-align:center;padding:16px 0;">
+          <div style="font-size:32px;margin-bottom:8px;">🌱</div>
+          <div style="font-size:13px;color:var(--text-light);">Create habits first to generate a report</div>
+        </div>
+      </div>`;
+  }
+
+  container.innerHTML = `
+    <div class="email-settings-card">
+      <div class="email-section-title">📬 Email Configuration</div>
+      <div class="email-input-row">
+        <div class="email-input-label">Your Email Address</div>
+        <input class="email-input-field" id="userEmailInput" type="email"
+          placeholder="you@example.com" value="${escHtml(savedEmail)}">
+      </div>
+      <div class="email-toggle-row">
+        <div>
+          <div class="email-toggle-label">Weekly Reports</div>
+          <div class="email-toggle-sub">Auto-send every Sunday</div>
+        </div>
+        <div class="toggle-wrap">
+          <input type="checkbox" class="toggle-input" id="weeklyMailToggle" ${weeklyEnabled ? 'checked' : ''} onchange="toggleWeeklyMail(this)">
+          <label class="toggle-label" for="weeklyMailToggle"></label>
+        </div>
+      </div>
+      <button class="btn-save-email" onclick="saveEmailSettings()">Save Email Settings</button>
+      <button class="btn-send-report" id="sendReportBtn" onclick="manualSendReport()">
+        📧 Send Weekly Report Now
+      </button>
+    </div>
+    ${reportPreviewHtml}`;
+}
+
+function saveEmailSettings() {
+  const email = document.getElementById('userEmailInput').value.trim();
+  if (!email) { showToast('❗ Please enter your email'); return; }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('❗ Please enter a valid email'); return; }
+  localStorage.setItem('habitra_email', email);
+  showToast('✅ Email saved!');
+  renderEmailSettings();
+}
+
+function toggleWeeklyMail(el) {
+  localStorage.setItem('weeklyMailEnabled', el.checked ? 'true' : 'false');
+  showToast(el.checked ? '📧 Weekly reports enabled!' : '🔕 Weekly reports disabled');
+}
+
+async function manualSendReport() {
+  const email = document.getElementById('userEmailInput').value.trim();
+  if (email) localStorage.setItem('habitra_email', email);
+
+  const savedEmail = localStorage.getItem('habitra_email') || '';
+  if (!savedEmail) { showToast('❗ Save your email address first'); return; }
+
+  const report = generateWeeklyReport();
+  if (!report) { showToast('📊 Create some habits to send a report!'); return; }
+
+  const btn = document.getElementById('sendReportBtn');
+  if (!btn) return;
+
+  // Loading state
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner"></span> Sending your weekly report…`;
+
+  try {
+    const success = await sendWeeklyReportEmail(report, true);
+    if (success) {
+      btn.innerHTML = '✅ Report Sent Successfully!';
+      btn.style.background = 'linear-gradient(135deg, var(--teal), var(--green))';
+      showToast('🚀 Weekly report sent successfully!');
+      setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = '📧 Send Weekly Report Now';
+        btn.style.background = '';
+        renderEmailSettings();
+      }, 3000);
+    }
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerHTML = '📧 Send Weekly Report Now';
+    const msg = err && err.text ? err.text : 'Send failed';
+    if (!navigator.onLine) showToast('❌ No internet connection');
+    else if (msg.toLowerCase().includes('invalid')) showToast('❌ Invalid email address');
+    else showToast('❌ Failed to send. Check email & try again.');
+  }
+}
+
+function requestNotifPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission().then(perm => {
+      if (perm === 'granted') {
+        scheduleSundayNotification();
+        showToast('🔔 Weekly report reminders enabled!');
+      }
+    });
+  } else if ('Notification' in window && Notification.permission === 'granted') {
+    scheduleSundayNotification();
+  }
+}
+
+let sundayNotificationTimer = null;
+
+function scheduleSundayNotification() {
+  // Calculate ms until next Sunday 9am
+  const now = new Date();
+  const nextSunday = new Date();
+  const daysUntilSunday = (7 - now.getDay()) % 7 || 7;
+  nextSunday.setDate(now.getDate() + daysUntilSunday);
+  nextSunday.setHours(9, 0, 0, 0);
+  const msUntilSunday = nextSunday - now;
+
+  localStorage.setItem('nextSundayCheck', nextSunday.toISOString());
+
+  if (sundayNotificationTimer) clearTimeout(sundayNotificationTimer);
+  sundayNotificationTimer = setTimeout(() => {
+    checkAndSendWeeklyMail();
+    // Show notification so user opens app if closed
+    if (Notification.permission === 'granted') {
+      const report = generateWeeklyReport();
+      if (report) {
+        new Notification('📊 HABITRA Weekly Report', {
+          body: `${report.completedThisWeek} habits done · ${report.currentStreak} day streak 🔥`,
+          icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">✅</text></svg>',
+          tag: 'habitra-weekly',
+          requireInteraction: true
+        });
+      }
+    }
+    // Reschedule for next Sunday
+    scheduleSundayNotification();
+  }, msUntilSunday);
+
+  console.log(`Next Sunday check scheduled in ${Math.round(msUntilSunday / 3600000)}h`);
+}
+
 // ===== INIT =====
 function init() {
   loadData();
+  if (window.emailjs) emailjs.init(EMAILJS_PUBLIC_KEY);
+  checkAndSendWeeklyMail();
+  setInterval(() => checkAndSendWeeklyMail(), 60 * 60 * 1000);
+  setTimeout(() => requestNotifPermission(), 3000); // ask after 3s so not jarring
   state.selectedDate = todayStr(); // Always reset to today on app start
 
   // FIX 1: Set real date on calendar icons immediately
@@ -2042,6 +2564,12 @@ function init() {
 }
 
 init();
+</script>
+<script>
+// Register Service Worker for background Sunday check
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('#', {scope: '/'}).catch(() => {});
+}
 </script>
 </body>
 </html>
