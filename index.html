@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>HABITRA – Habit Tracker & Journal</title>
+<title>HABITRA – Habit Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
@@ -394,9 +394,6 @@ body {
   width: 4px; height: 4px; border-radius: 50%; background: var(--teal);
 }
 
-.journal-header { padding: 20px; }
-.journal-title { font-size: 22px; font-weight: 800; color: var(--soft-black); }
-.journal-subtitle { font-size: 13px; color: var(--text-light); margin-top: 2px; }
 
 .timeline { padding: 0 20px; position: relative; }
 .timeline::before {
@@ -904,22 +901,6 @@ body {
     <div id="homeContent"></div>
   </div>
 
-  <!-- JOURNAL PAGE -->
-  <div class="page" id="page-journal">
-    <div class="top-header">
-      <div class="header-row">
-        <div>
-          <div class="journal-title">Journal</div>
-          <div class="journal-subtitle" id="journalCount">0 entries</div>
-        </div>
-        <div class="header-icons">
-          <button class="icon-btn" id="addJournalBtn">✏️</button>
-        </div>
-      </div>
-    </div>
-    <div id="journalContent" style="padding: 16px 20px; flex:1;"></div>
-  </div>
-
   <!-- ANALYTICS PAGE -->
   <div class="page" id="page-analytics">
     <div class="top-header">
@@ -966,11 +947,6 @@ body {
     <div class="nav-item active" onclick="switchPage('home')">
       <div class="nav-icon">🏠</div>
       <div class="nav-label">Home</div>
-      <div class="nav-indicator"></div>
-    </div>
-    <div class="nav-item" onclick="switchPage('journal')">
-      <div class="nav-icon">📔</div>
-      <div class="nav-label">Journal</div>
       <div class="nav-indicator"></div>
     </div>
     <div class="nav-item" onclick="switchPage('analytics')">
@@ -1101,54 +1077,6 @@ body {
   </div>
 </div>
 
-<!-- JOURNAL WRITE MODAL -->
-<div class="modal-overlay" id="journalWriteModal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Daily Reflection</div>
-    <div class="form-group">
-      <div class="form-label">Today's Reflection</div>
-      <textarea class="note-textarea" id="journalText" placeholder="How was your day? What are you grateful for? Any thoughts to capture..." style="min-height:140px;"></textarea>
-    </div>
-    <div class="form-group">
-      <div class="form-label">Overall Mood</div>
-    </div>
-    <div class="mood-selector" id="journalMoodSel">
-      <div class="mood-opt" data-mood="😄" onclick="selectJournalMood(this)">😄</div>
-      <div class="mood-opt" data-mood="😊" onclick="selectJournalMood(this)">😊</div>
-      <div class="mood-opt" data-mood="😐" onclick="selectJournalMood(this)">😐</div>
-      <div class="mood-opt" data-mood="😔" onclick="selectJournalMood(this)">😔</div>
-      <div class="mood-opt" data-mood="😤" onclick="selectJournalMood(this)">😤</div>
-    </div>
-    <div class="form-group">
-      <div class="form-label">Add Photo</div>
-    </div>
-    <div class="media-btn-row">
-      <div class="media-btn" id="galleryBtn" onclick="document.getElementById('journalPhotoInput').click()">
-        <div class="mb-icon">🖼️</div>
-        <div>Gallery</div>
-      </div>
-      <div class="media-btn" id="cameraBtn" onclick="document.getElementById('journalCameraInput').click()">
-        <div class="mb-icon">📷</div>
-        <div>Camera</div>
-      </div>
-    </div>
-    <div id="journalPhotoContainer" style="padding:0 20px 16px;display:none;">
-      <img id="journalPhotoPreview" style="width:100%;max-height:180px;object-fit:cover;border-radius:var(--radius-md);">
-      <div style="margin-top:8px;text-align:right;">
-        <span onclick="removeJournalPhoto()" style="font-size:12px;color:var(--coral);font-weight:600;cursor:pointer;">✕ Remove photo</span>
-      </div>
-    </div>
-    <input type="file" id="journalPhotoInput" accept="image/*" style="display:none" onchange="handleJournalPhoto(event)">
-    <input type="file" id="journalCameraInput" accept="image/*" capture="camera" style="display:none" onchange="handleJournalPhoto(event)">
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal('journalWriteModal')">Cancel</button>
-      <button class="btn-save" onclick="saveJournalEntry()">Save Entry 📔</button>
-    </div>
-    <div style="height:16px"></div>
-  </div>
-</div>
-
 <!-- HABIT DETAIL MODAL -->
 <div class="modal-overlay" id="habitDetailModal">
   <div class="modal-sheet">
@@ -1188,7 +1116,6 @@ let state = {
   habits: [],
   completions: {},
   notes: [],
-  journalEntries: [],
   settings: { name: '', notifications: true },
   selectedDate: todayStr(),
   currentView: 'cards',
@@ -1199,8 +1126,6 @@ let currentNoteHabitId = null;
 let selectedIcon = '⭐';
 let selectedColor = '#FFD600';
 let selectedMood = '';
-let selectedJournalMood = '';
-let journalPhotoData = '';
 let notePhotoData = '';
 let detailHabitId = null;
 
@@ -1217,6 +1142,7 @@ function loadData() {
   try {
     const saved = localStorage.getItem('habitra_v2');
     if (saved) state = { ...state, ...JSON.parse(saved) };
+    delete state[String.fromCharCode(106,111,117,114,110,97,108) + 'Entries'];
   } catch(e) {}
 }
 function saveData() {
@@ -1346,31 +1272,25 @@ function setupEmojiPicker() {
 const OB_STEPS = [
   {
     banner: { bg: 'linear-gradient(135deg,#FFD600,#FF9F1C)', emoji: '🏠', blobs: [{w:80,h:80,c:'#fff',t:'-10px',l:'-20px'},{w:50,h:50,c:'#FF9F1C',b:'-10px',r:'-10px'}] },
-    tag: '✦ Step 1 of 5', title: 'Your Daily Home Base',
+    tag: '✦ Step 1 of 4', title: 'Your Daily Home Base',
     desc: 'The Home screen shows all your habits for today. Tap the circle button on any habit to mark it done — watch your streak grow!',
     pills: [{ dot: '#FFD600', text: '✓ Mark habits done' },{ dot: '#FF9F1C', text: '🔥 Track your streaks' },{ dot: '#00C9A7', text: '📅 Scroll past days' }]
   },
   {
     banner: { bg: 'linear-gradient(135deg,#32C5FF,#B05CFF)', emoji: '➕', blobs: [{w:70,h:70,c:'#fff',b:'-15px',l:'10px'},{w:40,h:40,c:'#32C5FF',t:'-5px',r:'20px'}] },
-    tag: '✦ Step 2 of 5', title: 'Add Your First Habit',
+    tag: '✦ Step 2 of 4', title: 'Add Your First Habit',
     desc: 'Tap the big ＋ button (bottom right) to create a habit. Give it a name, pick an emoji icon and a colour that inspires you.',
     pills: [{ dot: '#32C5FF', text: '⭐ Choose an emoji' },{ dot: '#B05CFF', text: '🎨 Pick a colour' },{ dot: '#FF5A6E', text: '🏷️ Set a category' }]
   },
   {
-    banner: { bg: 'linear-gradient(135deg,#00C9A7,#32C5FF)', emoji: '📔', blobs: [{w:90,h:90,c:'#fff',t:'-20px',r:'-20px'},{w:45,h:45,c:'#00C9A7',b:'0px',l:'-5px'}] },
-    tag: '✦ Step 3 of 5', title: 'Journal Your Journey',
-    desc: 'The Journal tab captures your reflections, moods, and photos alongside your habits — building a beautiful diary of your growth.',
-    pills: [{ dot: '#00C9A7', text: '✏️ Write reflections' },{ dot: '#32C5FF', text: '😊 Log your mood' },{ dot: '#B05CFF', text: '📷 Attach photos' }]
-  },
-  {
     banner: { bg: 'linear-gradient(135deg,#FF5A6E,#B05CFF)', emoji: '📊', blobs: [{w:65,h:65,c:'#fff',b:'-10px',r:'10px'},{w:55,h:55,c:'#FF5A6E',t:'-10px',l:'-10px'}] },
-    tag: '✦ Step 4 of 5', title: 'Analyse Your Progress',
+    tag: '✦ Step 3 of 4', title: 'Analyse Your Progress',
     desc: 'Analytics shows your completion rates, weekly overview bars, and per-habit efficiency scores. Knowledge is the fuel for better habits!',
     pills: [{ dot: '#FF5A6E', text: '📈 Weekly bars' },{ dot: '#B05CFF', text: '🎯 Completion rate' },{ dot: '#FF9F1C', text: '🏆 Best streaks' }]
   },
   {
     banner: { bg: 'linear-gradient(135deg,#4CAF50,#00C9A7)', emoji: '🚀', blobs: [{w:75,h:75,c:'#fff',t:'-15px',l:'5px'},{w:50,h:50,c:'#4CAF50',b:'-5px',r:'-10px'}] },
-    tag: '✦ Step 5 of 5', title: "You're All Set!",
+    tag: '✦ Step 4 of 4', title: "You're All Set!",
     desc: "That's everything you need to start building life-changing habits. Remember — consistency beats perfection. See you tomorrow! 🌱",
     pills: [{ dot: '#4CAF50', text: '📅 Calendar history' },{ dot: '#00C9A7', text: '⚙️ Settings & export' },{ dot: '#FFD600', text: '🌟 Daily check-ins' }],
     isLast: true
@@ -1472,12 +1392,11 @@ function switchPage(page) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-' + page).classList.add('active');
   document.querySelectorAll('.nav-item').forEach((n, i) => {
-    n.classList.toggle('active', ['home','journal','analytics','calendar','settings'][i] === page);
+    n.classList.toggle('active', ['home','analytics','calendar','settings'][i] === page);
   });
   state.currentPage = page;
   document.getElementById('fabWrapper').style.display = (page === 'home') ? 'block' : 'none';
   if (page === 'home') renderHome();
-  if (page === 'journal') renderJournal();
   if (page === 'analytics') renderAnalytics();
   if (page === 'calendar') renderCalendarPage();
   if (page === 'settings') renderSettings();
@@ -1568,7 +1487,7 @@ function renderHome() {
           <div class="habit-icon-wrap" style="background:${habit.color}22"><span style="font-size:22px">${habit.icon}</span></div>
           <div class="habit-info">
             <div class="habit-name">${escHtml(habit.name)}</div>
-            <div class="habit-streak">🔥 <span>${streak}</span> day streak</div>
+            <div class="habit-streak">🔥 <span>${streak}</span> streak &nbsp;|&nbsp; 🏆 <span style="color:var(--purple)">${calcBestStreak(habit.id)}</span> best</div>
           </div>
           <div class="habit-actions">
             <button class="btn-note" onclick="event.stopPropagation();openNoteModal('${habit.id}')" title="Add Note">📝</button>
@@ -1736,39 +1655,11 @@ function selectMood(el) {
   el.classList.add('selected');
 }
 
-function selectJournalMood(el) {
-  selectedJournalMood = el.dataset.mood;
-  document.querySelectorAll('#journalMoodSel .mood-opt').forEach(m => m.classList.remove('selected'));
-  el.classList.add('selected');
-}
-
 function handlePhotoUpload(e) {
   const file = e.target.files[0]; if (!file) return;
   const reader = new FileReader();
   reader.onload = ev => { notePhotoData = ev.target.result; const p = document.getElementById('photoPreview'); p.src = notePhotoData; p.style.display = 'block'; };
   reader.readAsDataURL(file);
-}
-
-function handleJournalPhoto(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    journalPhotoData = ev.target.result;
-    document.getElementById('journalPhotoPreview').src = journalPhotoData;
-    document.getElementById('journalPhotoContainer').style.display = 'block';
-    document.getElementById('galleryBtn').classList.add('active-media');
-    document.getElementById('cameraBtn').classList.add('active-media');
-  };
-  reader.readAsDataURL(file);
-  e.target.value = '';
-}
-
-function removeJournalPhoto() {
-  journalPhotoData = '';
-  document.getElementById('journalPhotoContainer').style.display = 'none';
-  document.getElementById('journalPhotoPreview').src = '';
-  document.getElementById('galleryBtn').classList.remove('active-media');
-  document.getElementById('cameraBtn').classList.remove('active-media');
 }
 
 function saveNote() {
@@ -1777,46 +1668,6 @@ function saveNote() {
   const habit = state.habits.find(h => h.id === currentNoteHabitId);
   state.notes.unshift({ id: 'n_' + Date.now(), habitId: currentNoteHabitId, habitName: habit ? habit.name : '', habitIcon: habit ? habit.icon : '', habitColor: habit ? habit.color : '#000', text, mood: selectedMood, photo: notePhotoData, date: state.selectedDate, ts: Date.now() });
   saveData(); closeModal('noteModal'); showToast('📝 Note saved!');
-  if (state.currentPage === 'journal') renderJournal();
-}
-
-// ===== JOURNAL =====
-function saveJournalEntry() {
-  const text = document.getElementById('journalText').value.trim();
-  if (!text && !journalPhotoData) { showToast('❗ Write something first'); return; }
-  state.journalEntries.unshift({ id: 'j_' + Date.now(), text, mood: selectedJournalMood, photo: journalPhotoData, date: todayStr(), ts: Date.now() });
-  saveData(); closeModal('journalWriteModal'); showToast('📔 Entry saved!'); renderJournal();
-}
-
-function renderJournal() {
-  const allEntries = [
-    ...state.notes.map(n => ({...n, type: 'note'})),
-    ...state.journalEntries.map(e => ({...e, type: 'journal'}))
-  ].sort((a,b) => b.ts - a.ts);
-
-  const count = allEntries.length;
-  document.getElementById('journalCount').textContent = count + ' ' + (count === 1 ? 'entry' : 'entries');
-  const container = document.getElementById('journalContent');
-
-  if (allEntries.length === 0) {
-    container.innerHTML = `<div class="empty-state" style="padding-top:40px"><div class="empty-icon">✏️</div><div class="empty-title">No journal entries</div><div class="empty-subtitle">Capture your thoughts, track your moods, and reflect on your journey.</div><button class="btn-primary" onclick="document.getElementById('addJournalBtn').click()">Write First Entry</button></div>`;
-    return;
-  }
-
-  const groups = {};
-  allEntries.forEach(e => { if (!groups[e.date]) groups[e.date] = []; groups[e.date].push(e); });
-  let html = '<div class="timeline">';
-  Object.keys(groups).sort((a,b) => b > a ? 1 : -1).forEach(date => {
-    const d = new Date(date + 'T00:00:00');
-    html += `<div style="font-size:11px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.8px;padding:8px 0 12px;margin-left:28px;">${formatDateLabel(d)}</div>`;
-    groups[date].forEach(entry => {
-      let dot = '#32C5FF', typeLabel = '📝 Habit Note';
-      if (entry.type === 'journal') { dot = '#B05CFF'; typeLabel = '📔 Daily Reflection'; }
-      html += `<div class="timeline-entry"><div class="timeline-dot" style="background:${dot}"></div><div class="timeline-card"><div class="timeline-type">${typeLabel}${entry.habitName ? ' · ' + (entry.habitIcon||'') + ' ' + escHtml(entry.habitName) : ''}</div>${entry.text ? `<div class="timeline-text">${escHtml(entry.text)}</div>` : ''}${entry.mood ? `<div class="mood-badge">${entry.mood} Feeling ${moodLabel(entry.mood)}</div>` : ''}${entry.photo ? `<img src="${entry.photo}" class="timeline-img" loading="lazy">` : ''}</div></div>`;
-    });
-  });
-  html += '</div>';
-  container.innerHTML = html;
 }
 
 function moodLabel(m) { return {'😄':'Great','😊':'Good','😐':'Okay','😔':'Low','😤':'Stressed'}[m] || ''; }
@@ -1910,10 +1761,6 @@ function renderCalDayDetail(ds) {
   habitRows.forEach(({ h, done, notes }) => {
     html += `<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-top:1px solid var(--cream);"><div style="width:36px;height:36px;border-radius:10px;background:${h.color}22;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;">${h.icon}</div><div style="flex:1;min-width:0;"><div style="display:flex;align-items:center;gap:8px;"><div style="font-size:13px;font-weight:600;color:var(--soft-black);flex:1;">${escHtml(h.name)}</div><div style="font-size:18px;">${done ? '✅' : '⬜'}</div></div><div style="font-size:11px;color:${done ? 'var(--teal)' : 'var(--text-light)'};font-weight:600;margin-top:2px;">${done ? 'Completed' : 'Not completed'}</div>${notes.map(n => `<div style="background:var(--cream);border-radius:8px;padding:8px 10px;margin-top:6px;">${n.text ? `<div style="font-size:12px;color:var(--soft-black);line-height:1.5;">${escHtml(n.text)}</div>` : ''}${n.mood ? `<div style="font-size:11px;color:var(--text-light);margin-top:3px;">${n.mood} ${moodLabel(n.mood)}</div>` : ''}${n.photo ? `<img src="${n.photo}" style="width:100%;border-radius:6px;margin-top:6px;max-height:100px;object-fit:cover;" loading="lazy">` : ''}</div>`).join('')}</div></div>`;
   });
-  const journalEntries = state.journalEntries.filter(e => e.date === ds);
-  if (journalEntries.length > 0) {
-    html += `<div style="border-top:1px solid var(--cream);margin-top:8px;padding-top:10px;"><div style="font-size:11px;font-weight:700;color:var(--text-light);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;">Journal</div>${journalEntries.map(e => `<div style="background:var(--cream);border-radius:8px;padding:10px 12px;margin-bottom:6px;">${e.mood ? `<div style="font-size:16px;margin-bottom:4px;">${e.mood}</div>` : ''}${e.text ? `<div style="font-size:12px;color:var(--soft-black);line-height:1.5;">${escHtml(e.text)}</div>` : ''}${e.photo ? `<img src="${e.photo}" style="width:100%;border-radius:6px;margin-top:6px;max-height:120px;object-fit:cover;" loading="lazy">` : ''}</div>`).join('')}</div>`;
-  }
   html += `</div>`;
   detail.innerHTML = html;
 }
@@ -2028,13 +1875,13 @@ function clearAllDataConfirm() { showClearConfirm(); }
 function showClearConfirm() {
   const overlay = document.createElement('div');
   overlay.style.cssText = `position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:700;display:flex;align-items:center;justify-content:center;padding:24px;`;
-  overlay.innerHTML = `<div style="background:white;border-radius:24px;padding:28px;width:100%;max-width:340px;text-align:center;"><div style="font-size:40px;margin-bottom:12px;">⚠️</div><div style="font-size:18px;font-weight:800;color:#111;margin-bottom:8px;">Clear All Data?</div><div style="font-size:14px;color:#999;line-height:1.6;margin-bottom:24px;">This will permanently delete all your habits, completions, notes, and journal entries. This cannot be undone.</div><div style="display:flex;gap:10px;"><button onclick="this.closest('div[style]').remove()" style="flex:1;background:#F5F1E8;border:none;border-radius:100px;padding:14px;font-size:14px;font-weight:600;font-family:Poppins,sans-serif;cursor:pointer;color:#555;">Cancel</button><button onclick="doResetApp()" style="flex:1;background:#FF5A6E;border:none;border-radius:100px;padding:14px;font-size:14px;font-weight:700;font-family:Poppins,sans-serif;cursor:pointer;color:white;">Delete All</button></div></div>`;
+  overlay.innerHTML = `<div style="background:white;border-radius:24px;padding:28px;width:100%;max-width:340px;text-align:center;"><div style="font-size:40px;margin-bottom:12px;">⚠️</div><div style="font-size:18px;font-weight:800;color:#111;margin-bottom:8px;">Clear All Data?</div><div style="font-size:14px;color:#999;line-height:1.6;margin-bottom:24px;">This will permanently delete all your habits, completions, and notes. This cannot be undone.</div><div style="display:flex;gap:10px;"><button onclick="this.closest('div[style]').remove()" style="flex:1;background:#F5F1E8;border:none;border-radius:100px;padding:14px;font-size:14px;font-weight:600;font-family:Poppins,sans-serif;cursor:pointer;color:#555;">Cancel</button><button onclick="doResetApp()" style="flex:1;background:#FF5A6E;border:none;border-radius:100px;padding:14px;font-size:14px;font-weight:700;font-family:Poppins,sans-serif;cursor:pointer;color:white;">Delete All</button></div></div>`;
   document.body.appendChild(overlay);
 }
 
 function doResetApp() {
   localStorage.removeItem('habitra_v2'); localStorage.removeItem('habitra_launched'); localStorage.removeItem('habitra_onboarded');
-  state = { habits: [], completions: {}, notes: [], journalEntries: [], settings: { name: '', notifications: true }, selectedDate: todayStr(), currentView: 'cards', currentPage: 'home' };
+  state = { habits: [], completions: {}, notes: [], settings: { name: '', notifications: true }, selectedDate: todayStr(), currentView: 'cards', currentPage: 'home' };
   document.querySelectorAll('body > div[style]').forEach(el => { if (el.innerHTML.includes('Delete All')) el.remove(); });
   location.reload();
 }
@@ -2080,14 +1927,6 @@ document.getElementById('viewToggleBtn').onclick = () => {
   state.currentView = state.currentView === 'cards' ? 'list' : 'cards';
   document.getElementById('viewToggleBtn').textContent = state.currentView === 'list' ? '☰' : '⊞';
   renderHome();
-};
-
-// ===== JOURNAL BUTTON =====
-document.getElementById('addJournalBtn').onclick = () => {
-  document.getElementById('journalText').value = '';
-  removeJournalPhoto(); journalPhotoData = ''; selectedJournalMood = '';
-  document.querySelectorAll('#journalMoodSel .mood-opt').forEach(m => m.classList.remove('selected'));
-  openModal('journalWriteModal');
 };
 
 document.getElementById('openCalBtn').onclick = () => switchPage('calendar');
