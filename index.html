@@ -2462,6 +2462,8 @@ function renderSettings() {
     <div class="profile-card"><div class="avatar">${name.charAt(0).toUpperCase()}</div><div><div class="profile-name">${escHtml(name)}</div><div class="profile-sub">${habitsCount} habits · ${totalDone} completions</div></div><button class="profile-edit" onclick="openNameEdit()">Edit</button></div>
     <div class="settings-section-label">Preferences</div>
     <div class="settings-section"><div class="settings-group"><div class="settings-item"><div class="settings-item-icon" style="background:#FFD60022;">🔔</div><div class="settings-item-info"><div class="settings-item-name">Notifications</div><div class="settings-item-desc">Daily habit reminders</div></div><div class="toggle-wrap"><input type="checkbox" class="toggle-input" id="notifToggle" ${s.notifications ? 'checked' : ''} onchange="toggleNotif(this)"><label class="toggle-label" for="notifToggle"></label></div></div></div></div>
+    <div class="settings-section-label">Appearance</div>
+    <div class="settings-section"><div class="settings-group"><div class="settings-item"><div class="settings-item-icon" style="background:#32C5FF22;">◐</div><div class="settings-item-info"><div class="settings-item-name">Auto Dark Mode</div><div class="settings-item-desc">Light during day, dark at night</div></div><div class="toggle-wrap"><input type="checkbox" class="toggle-input" id="autoDarkToggle" ${getAutoDarkMode() ? 'checked' : ''} onchange="toggleAutoDarkMode(this)"><label class="toggle-label" for="autoDarkToggle"></label></div></div></div></div>
     <div class="settings-section-label">Help</div>
     <div class="settings-section"><div class="settings-group"><div class="settings-item" onclick="showOnboarding()"><div class="settings-item-icon" style="background:#32C5FF22;">🧭</div><div class="settings-item-info"><div class="settings-item-name">App Tour</div><div class="settings-item-desc">Replay the how-it-works walkthrough</div></div><div class="settings-item-right">›</div></div></div></div>
     <div class="settings-section-label">Data</div>
@@ -3281,6 +3283,34 @@ function startSound(type) {
 }
 
 // ===== DARK MODE =====
+let autoDarkModeTimer = null;
+
+function getAutoDarkMode() {
+  return localStorage.getItem('habitra_auto_darkmode') !== 'false';
+}
+
+function shouldUseAutoDarkMode() {
+  const hour = new Date().getHours();
+  return hour >= 18 || hour < 6;
+}
+
+function applyAutoDarkMode() {
+  if (getAutoDarkMode()) setDarkMode(shouldUseAutoDarkMode());
+}
+
+function toggleAutoDarkMode(el) {
+  const enabled = !!el.checked;
+  localStorage.setItem('habitra_auto_darkmode', enabled ? 'true' : 'false');
+  if (enabled) applyAutoDarkMode();
+  else setDarkMode(false);
+}
+
+function disableAutoDarkMode() {
+  localStorage.setItem('habitra_auto_darkmode', 'false');
+  const autoToggle = document.getElementById('autoDarkToggle');
+  if (autoToggle) autoToggle.checked = false;
+}
+
 function setDarkMode(isDark) {
   const checkbox = document.getElementById('themeCheckbox');
   const toggle = document.getElementById('darkModeToggle');
@@ -3295,21 +3325,30 @@ function initDarkMode() {
   const saved = localStorage.getItem('habitra_darkmode');
   const checkbox = document.getElementById('themeCheckbox');
   const toggle = document.getElementById('darkModeToggle');
-  setDarkMode(saved === 'true');
+  if (getAutoDarkMode()) applyAutoDarkMode();
+  else setDarkMode(saved === 'true');
 
   if (toggle) {
     toggle.addEventListener('click', (event) => {
       event.preventDefault();
+      disableAutoDarkMode();
       setDarkMode(!document.body.classList.contains('dark-mode'));
     });
     toggle.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
+        disableAutoDarkMode();
         setDarkMode(!document.body.classList.contains('dark-mode'));
       }
     });
   }
-  if (checkbox) checkbox.addEventListener('change', () => setDarkMode(checkbox.checked));
+  if (checkbox) checkbox.addEventListener('change', () => {
+    disableAutoDarkMode();
+    setDarkMode(checkbox.checked);
+  });
+
+  if (autoDarkModeTimer) clearInterval(autoDarkModeTimer);
+  autoDarkModeTimer = setInterval(applyAutoDarkMode, 60 * 1000);
 }
 
 // ===== INIT =====
