@@ -2602,7 +2602,7 @@ function renderSettings() {
     <div class="settings-section-label">Help</div>
     <div class="settings-section"><div class="settings-group"><div class="settings-item" onclick="showOnboarding()"><div class="settings-item-icon" style="background:#32C5FF22;">🧭</div><div class="settings-item-info"><div class="settings-item-name">App Tour</div><div class="settings-item-desc">Replay the how-it-works walkthrough</div></div><div class="settings-item-right">›</div></div></div></div>
     <div class="settings-section-label">Data</div>
-    <div class="settings-section"><div class="settings-group"><div class="settings-item" onclick="exportData()"><div class="settings-item-icon" style="background:#00C9A722;">📤</div><div class="settings-item-info"><div class="settings-item-name">Export Data</div><div class="settings-item-desc">Download your habit data as JSON</div></div><div class="settings-item-right">›</div></div><div class="settings-item" onclick="clearAllDataConfirm()"><div class="settings-item-icon" style="background:#FF5A6E22;">🗑️</div><div class="settings-item-info"><div class="settings-item-name">Clear All Data</div><div class="settings-item-desc">Reset the app completely</div></div><div class="settings-item-right">›</div></div></div></div>
+    <div class="settings-section"><div class="settings-group"><div class="settings-item" onclick="clearAllDataConfirm()"><div class="settings-item-icon" style="background:#FF5A6E22;">🗑️</div><div class="settings-item-info"><div class="settings-item-name">Clear All Data</div><div class="settings-item-desc">Reset the app completely</div></div><div class="settings-item-right">›</div></div></div></div>
     <div class="settings-section-label">📧 Weekly Email Reports</div>
     <div id="emailSettingsSection"></div>
     <div class="settings-section-label">About</div>
@@ -2667,16 +2667,6 @@ function saveProfile() {
   if (!name) { showToast('❗ Please enter a name'); return; }
   state.settings.name = name; saveData(); closeModal('nameModal'); renderSettings(); updateHeaderDate(); showToast('✅ Profile saved!');
 }
-
-function exportData() {
-  try {
-    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href = url; a.download = 'habitra_backup.json'; a.click();
-    URL.revokeObjectURL(url); showToast('📤 Data exported!');
-  } catch(e) { showToast('❗ Export failed'); }
-}
-
 function clearAllDataConfirm() { showClearConfirm(); }
 
 function showClearConfirm() {
@@ -2687,7 +2677,22 @@ function showClearConfirm() {
 }
 
 function doResetApp() {
-  localStorage.removeItem('habitra_v2'); localStorage.removeItem('habitra_launched'); localStorage.removeItem('habitra_onboarded');
+  [
+    'habitra_v2',
+    'habitra_launched',
+    'habitra_onboarded',
+    'habitra_email',
+    'weeklyMailEnabled',
+    'lastWeeklyMailSent',
+    'weeklyReportData',
+    'nextSundayCheck',
+    'habitra_darkmode',
+    'habitra_auto_darkmode'
+  ].forEach(key => localStorage.removeItem(key));
+  if (typeof sundayNotificationTimer !== 'undefined' && sundayNotificationTimer) {
+    clearTimeout(sundayNotificationTimer);
+    sundayNotificationTimer = null;
+  }
   state = { habits: [], completions: {}, notes: [], settings: { name: '', notifications: true }, selectedDate: todayStr(), currentView: 'cards', currentPage: 'home' };
   document.querySelectorAll('body > div[style]').forEach(el => { if (el.innerHTML.includes('Delete All')) el.remove(); });
   location.reload();
