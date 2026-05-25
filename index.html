@@ -523,6 +523,25 @@ body {
   padding: 8px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
   font-family: 'Poppins', sans-serif; color: var(--text-mid);
 }
+.developer-credit {
+  margin: 14px 16px 28px;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+  color: var(--text-light);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .2px;
+}
+.developer-credit strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--soft-black);
+  font-size: 12px;
+  letter-spacing: .5px;
+}
 
 .settings-section { padding: 0 16px 8px; }
 .settings-group { background: var(--white); border-radius: var(--radius-xl); box-shadow: var(--shadow-card); overflow: hidden; }
@@ -781,6 +800,7 @@ body.dark-mode .email-settings-card,
 body.dark-mode .weekly-report-preview,
 body.dark-mode .stat-card,
 body.dark-mode .habit-perf-card,
+body.dark-mode .developer-credit,
 body.dark-mode .pomo-clock-card,
 body.dark-mode .pomo-stat-box,
 body.dark-mode .pomo-sound-card,
@@ -1574,6 +1594,13 @@ function setupEmojiPicker() {
 // =============================================
 const OB_STEPS = [
   {
+    banner: { bg: 'linear-gradient(135deg,#32C5FF,#00C9A7)', emoji: '✨', blobs: [{w:80,h:80,c:'#fff',t:'-12px',l:'-18px'},{w:52,h:52,c:'#32C5FF',b:'-10px',r:'-8px'}] },
+    tag: 'Developer',
+    title: 'App Developed By',
+    desc: 'This app was developed by GOUTHAM SAI REDDY.',
+    pills: [{ dot: '#32C5FF', text: 'HABITRA' },{ dot: '#00C9A7', text: 'Created with care' },{ dot: '#B05CFF', text: 'Built for better habits' }]
+  },
+  {
     banner: { bg: 'linear-gradient(135deg,#FFD600,#FF9F1C)', emoji: '🏠', blobs: [{w:80,h:80,c:'#fff',t:'-10px',l:'-20px'},{w:50,h:50,c:'#FF9F1C',b:'-10px',r:'-10px'}] },
     tag: '✦ Step 1 of 4', title: 'Your Daily Home Base',
     desc: 'The Home screen shows all your habits for today. Tap the circle button on any habit to mark it done — watch your streak grow!',
@@ -1624,7 +1651,7 @@ function renderOnboardingStep(animate = true) {
   }).join('');
   banner.style.background = step.banner.bg;
   banner.innerHTML = `${blobsHtml}<div class="onboarding-banner-emoji">${step.banner.emoji}</div>`;
-  document.getElementById('obStepTag').textContent = step.tag;
+  document.getElementById('obStepTag').textContent = `Step ${obStep + 1} of ${OB_STEPS.length}`;
   document.getElementById('obTitle').textContent = step.title;
   document.getElementById('obDesc').textContent = step.desc;
   const pillsEl = document.getElementById('obPills');
@@ -2403,7 +2430,16 @@ function renderSettings() {
     <div id="emailSettingsSection"></div>
     <div class="settings-section-label">About</div>
     <div class="settings-section"><div class="settings-group"><div class="settings-item"><div class="settings-item-icon" style="background:#B05CFF22;">✨</div><div class="settings-item-info"><div class="settings-item-name">HABITRA</div><div class="settings-item-desc">Build habits, change your life — v2.0</div></div></div></div></div>
+    <div class="developer-credit">This app was developed by<strong>GOUTHAM SAI REDDY</strong></div>
     <div style="height:24px"></div>`;
+  document.querySelectorAll('#settingsContent .settings-section-label').forEach(label => {
+    const text = label.textContent.trim();
+    if (text === 'Preferences' || text === 'About') {
+      const section = label.nextElementSibling;
+      if (section && section.classList.contains('settings-section')) section.remove();
+      label.remove();
+    }
+  });
   renderEmailSettings();
   setTimeout(() => renderEmailSettings(), 0);
 }
