@@ -677,11 +677,19 @@ body {
   animation: cardPop .45s cubic-bezier(.34,1.56,.64,1);
 }
 @keyframes cardPop { from{transform:scale(.85) translateY(24px);opacity:0} to{transform:scale(1) translateY(0);opacity:1} }
+.onboarding-card.is-transitioning .onboarding-banner,
+.onboarding-card.is-transitioning .onboarding-body,
+.onboarding-card.is-transitioning .onboarding-footer {
+  opacity: 0;
+  transform: translateY(8px);
+}
+.onboarding-card.is-transitioning .onboarding-actions { pointer-events: none; }
 .onboarding-banner {
   width: 100%; height: 160px;
   display: flex; align-items: center; justify-content: center;
   position: relative; overflow: hidden;
   flex-direction: column; gap: 8px;
+  transition: opacity .22s ease, transform .22s ease, background .32s ease;
 }
 .onboarding-banner-emoji { font-size: 56px; position: relative; z-index: 1; animation: pulseEmoji 2s ease-in-out infinite; }
 @keyframes pulseEmoji { 0%,100%{transform:scale(1) rotate(-3deg)} 50%{transform:scale(1.1) rotate(3deg)} }
@@ -690,7 +698,7 @@ body {
   animation: blobFloat 4s ease-in-out infinite alternate;
 }
 @keyframes blobFloat { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(10px,-8px) scale(1.08)} }
-.onboarding-body { padding: 24px 24px 20px; }
+.onboarding-body { padding: 24px 24px 20px; transition: opacity .22s ease, transform .22s ease; }
 .onboarding-step-tag {
   display: inline-flex; align-items: center; gap: 6px;
   background: var(--cream); border-radius: 100px; padding: 4px 12px;
@@ -709,6 +717,7 @@ body {
 .onboarding-footer {
   display: flex; align-items: center; justify-content: space-between;
   padding: 16px 24px 24px;
+  transition: opacity .22s ease, transform .22s ease, border-color .2s ease, background .2s ease;
 }
 .onboarding-dots { display: flex; gap: 6px; }
 .onboarding-dot {
@@ -756,6 +765,7 @@ body.dark-mode {
   --soft-black: #e0e0e0;
   --text-mid: #aaaaaa;
   --text-light: #777777;
+  --yellow: #32C5FF;
   --shadow-soft: 0 4px 20px rgba(0,0,0,0.4);
   --shadow-card: 0 2px 12px rgba(0,0,0,0.3);
 }
@@ -769,6 +779,8 @@ body.dark-mode .calendar-main,
 body.dark-mode .chart-card,
 body.dark-mode .email-settings-card,
 body.dark-mode .weekly-report-preview,
+body.dark-mode .stat-card,
+body.dark-mode .habit-perf-card,
 body.dark-mode .pomo-clock-card,
 body.dark-mode .pomo-stat-box,
 body.dark-mode .pomo-sound-card,
@@ -821,8 +833,58 @@ body.dark-mode .nav-item.active .cal-nav-icon-date,
 body.dark-mode .icon-btn .cal-nav-icon-date {
   color: #e0e0e0;
 }
+body.dark-mode .analytics-tabs {
+  background: #16213e;
+}
+body.dark-mode .analytics-tab.active {
+  background: var(--sky);
+  color: #07111f;
+}
+body.dark-mode .week-bar-label[style],
+body.dark-mode .week-bar-col div[style*="var(--soft-black)"] {
+  color: #e0e0e0 !important;
+}
+body.dark-mode .habit-perf-bar-bg {
+  background: #16213e;
+}
 body.dark-mode .welcome-modal,
 body.dark-mode .onboarding-card { background: #1a1a2e; }
+body.dark-mode .onboarding-backdrop {
+  background: rgba(3,8,20,0.86);
+}
+body.dark-mode .onboarding-card {
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.65);
+}
+body.dark-mode .onboarding-body {
+  background: #1a1a2e;
+}
+body.dark-mode .onboarding-step-tag,
+body.dark-mode .onboarding-pill {
+  background: #16213e;
+  color: #e0e0e0;
+}
+body.dark-mode .onboarding-footer {
+  background: #1a1a2e;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+body.dark-mode .onboarding-dot {
+  background: #16213e;
+}
+body.dark-mode .onboarding-dot.active {
+  background: var(--sky);
+}
+body.dark-mode .ob-skip-btn {
+  color: #aaaaaa;
+}
+body.dark-mode .ob-next-btn {
+  background: var(--sky);
+  color: #07111f;
+  box-shadow: 0 6px 18px rgba(50,197,255,0.28);
+}
+body.dark-mode .ob-next-btn:active {
+  box-shadow: 0 2px 10px rgba(50,197,255,0.2);
+}
 body.dark-mode .welcome-input { background: #16213e; color: #e0e0e0; }
 body.dark-mode .app-loader { background: #1a1a2e; }
 
@@ -1539,14 +1601,17 @@ const OB_STEPS = [
 ];
 
 let obStep = 0;
+let obTransitioning = false;
 
 function showOnboarding() {
   obStep = 0;
-  renderOnboardingStep();
+  renderOnboardingStep(false);
   document.getElementById('onboardingOverlay').classList.add('active');
 }
 
-function renderOnboardingStep() {
+function renderOnboardingStep(animate = true) {
+  const card = document.getElementById('onboardingCard');
+  const applyStep = () => {
   const step = OB_STEPS[obStep];
   const banner = document.getElementById('obBanner');
   let blobsHtml = step.banner.blobs.map(b => {
@@ -1572,14 +1637,27 @@ function renderOnboardingStep() {
   ).join('');
   document.getElementById('obSkipBtn').style.display = step.isLast ? 'none' : 'block';
   document.getElementById('obNextBtn').textContent = step.isLast ? "Let's Build! 🌱" : 'Next →';
-  const card = document.getElementById('onboardingCard');
-  card.style.animation = 'none';
-  void card.offsetWidth;
-  card.style.animation = 'cardPop .35s cubic-bezier(.34,1.56,.64,1)';
+  };
+
+  if (!animate || !card) {
+    applyStep();
+    return;
+  }
+
+  obTransitioning = true;
+  card.classList.add('is-transitioning');
+  setTimeout(() => {
+    applyStep();
+    requestAnimationFrame(() => {
+      card.classList.remove('is-transitioning');
+      setTimeout(() => { obTransitioning = false; }, 230);
+    });
+  }, 170);
 }
 
 function nextOnboardingStep() {
-  if (obStep < OB_STEPS.length - 1) { obStep++; renderOnboardingStep(); }
+  if (obTransitioning) return;
+  if (obStep < OB_STEPS.length - 1) { obStep++; renderOnboardingStep(true); }
   else { finishOnboarding(); }
 }
 
@@ -1987,7 +2065,10 @@ function getAnalyticsData() {
 
 function renderAnalyticsOverview(container) {
   const d = getAnalyticsData();
-  const barColors = ['#FFD600','#FF5A6E','#00C9A7','#32C5FF','#B05CFF','#FF9F1C','#4CAF50'];
+  const isDark = document.body.classList.contains('dark-mode');
+  const barColors = isDark
+    ? ['#32C5FF','#00C9A7','#B05CFF','#FF5A6E','#4CAF50','#00BCD4','#E91E63']
+    : ['#FFD600','#FF5A6E','#00C9A7','#32C5FF','#B05CFF','#FF9F1C','#4CAF50'];
   let html = `<div class="stats-grid">
     <div class="stat-card"><div class="stat-icon">🎯</div><div class="stat-value">${d.todayPct}%</div><div class="stat-label">Today's Completion</div></div>
     <div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-value">${d.overallBest}</div><div class="stat-label">Best Streak Ever</div></div>
@@ -1999,7 +2080,7 @@ function renderAnalyticsOverview(container) {
     <div class="chart-card-sub">Daily completion rate</div>
     <div class="weekly-bars" style="height:90px;">${d.weekData.map((w,i) => `<div class="week-bar-col">
       <div style="font-size:10px;font-weight:700;color:${w.pct>0?'var(--soft-black)':'var(--cream2)'};margin-bottom:2px;">${w.pct}%</div>
-      <div class="week-bar-wrap"><div class="week-bar" style="height:${Math.max((w.pct/100)*56,4)}px;background:${w.isToday?'var(--soft-black)':barColors[i%barColors.length]};border-radius:6px 6px 0 0;"></div></div>
+      <div class="week-bar-wrap"><div class="week-bar" style="height:${Math.max((w.pct/100)*56,4)}px;background:${w.isToday ? (isDark ? 'var(--sky)' : 'var(--soft-black)') : barColors[i%barColors.length]};border-radius:6px 6px 0 0;"></div></div>
       <div class="week-bar-label" style="${w.isToday?'color:var(--soft-black);font-weight:700':''}">${w.label}</div>
     </div>`).join('')}</div>
   </div>
@@ -2143,6 +2224,7 @@ function renderAnalyticsMonthly(container) {
 
 function renderAnalyticsInsights(container) {
   const d = getAnalyticsData();
+  const isDark = document.body.classList.contains('dark-mode');
   const avgConsistency = d.avgConsistency;
   const bestDay = d.weekData.reduce((a,b) => b.pct > a.pct ? b : a, d.weekData[0]);
   const worstDay = d.weekData.reduce((a,b) => b.pct < a.pct ? b : a, d.weekData[0]);
@@ -2191,8 +2273,8 @@ function renderAnalyticsInsights(container) {
     const ctx = document.getElementById('radarStyleChart');
     if (ctx && window.Chart) new Chart(ctx, {
       type: 'bar',
-      data: { labels: d.weekData.map(w => w.label), datasets: [{ data: d.weekData.map(w => w.pct), backgroundColor: d.weekData.map(w => w.pct >= 80 ? '#00C9A7' : w.pct >= 50 ? '#FFD600' : w.pct > 0 ? '#FF9F1C' : '#EDE8DC'), borderRadius: 8, borderSkipped: false }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 11 }, color: '#555' } }, y: { min: 0, max: 100, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { callback: v => v + '%', font: { size: 10 }, color: '#999' } } } }
+      data: { labels: d.weekData.map(w => w.label), datasets: [{ data: d.weekData.map(w => w.pct), backgroundColor: d.weekData.map(w => w.pct >= 80 ? '#00C9A7' : w.pct >= 50 ? (isDark ? '#32C5FF' : '#FFD600') : w.pct > 0 ? (isDark ? '#B05CFF' : '#FF9F1C') : (isDark ? '#16213e' : '#EDE8DC')), borderRadius: 8, borderSkipped: false }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 11 }, color: isDark ? '#aaaaaa' : '#555' } }, y: { min: 0, max: 100, grid: { color: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)' }, ticks: { callback: v => v + '%', font: { size: 10 }, color: isDark ? '#aaaaaa' : '#999' } } } }
     });
   }, 80);
 }
@@ -3130,6 +3212,7 @@ function setDarkMode(isDark) {
   localStorage.setItem('habitra_darkmode', isDark ? 'true' : 'false');
   if (checkbox) checkbox.checked = isDark;
   if (toggle) toggle.setAttribute('aria-checked', isDark ? 'true' : 'false');
+  if (state.currentPage === 'analytics') renderAnalytics();
 }
 
 function initDarkMode() {
