@@ -726,6 +726,31 @@ body {
 }
 .onboarding-title { font-size: 20px; font-weight: 800; color: var(--soft-black); line-height: 1.25; margin-bottom: 8px; }
 .onboarding-desc { font-size: 13px; color: var(--text-mid); line-height: 1.7; }
+.onboarding-card.developer-step .onboarding-banner {
+  display: none;
+}
+.onboarding-card.developer-step .onboarding-body {
+  padding: 44px 28px 34px;
+  text-align: center;
+}
+.onboarding-card.developer-step .onboarding-title {
+  font-size: 13px;
+  line-height: 1.4;
+  letter-spacing: 1.4px;
+  color: var(--text-light);
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.onboarding-card.developer-step .onboarding-desc {
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 29px;
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: 1.6px;
+  color: var(--sky);
+  text-transform: uppercase;
+  text-shadow: 0 8px 24px rgba(50,197,255,0.18);
+}
 .onboarding-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
 .onboarding-pill {
   display: flex; align-items: center; gap: 6px;
@@ -883,6 +908,13 @@ body.dark-mode .onboarding-step-tag,
 body.dark-mode .onboarding-pill {
   background: #16213e;
   color: #e0e0e0;
+}
+body.dark-mode .onboarding-card.developer-step .onboarding-title {
+  color: #aaaaaa;
+}
+body.dark-mode .onboarding-card.developer-step .onboarding-desc {
+  color: var(--sky);
+  text-shadow: 0 10px 30px rgba(50,197,255,0.28);
 }
 body.dark-mode .onboarding-footer {
   background: #1a1a2e;
@@ -1597,8 +1629,9 @@ const OB_STEPS = [
     banner: { bg: 'linear-gradient(135deg,#32C5FF,#00C9A7)', emoji: '✨', blobs: [{w:80,h:80,c:'#fff',t:'-12px',l:'-18px'},{w:52,h:52,c:'#32C5FF',b:'-10px',r:'-8px'}] },
     tag: 'Developer',
     title: 'App Developed By',
-    desc: 'This app was developed by GOUTHAM SAI REDDY.',
-    pills: [{ dot: '#32C5FF', text: 'HABITRA' },{ dot: '#00C9A7', text: 'Created with care' },{ dot: '#B05CFF', text: 'Built for better habits' }]
+    desc: 'GOUTHAM SAI REDDY',
+    isDeveloper: true,
+    pills: []
   },
   {
     banner: { bg: 'linear-gradient(135deg,#FFD600,#FF9F1C)', emoji: '🏠', blobs: [{w:80,h:80,c:'#fff',t:'-10px',l:'-20px'},{w:50,h:50,c:'#FF9F1C',b:'-10px',r:'-10px'}] },
@@ -1640,6 +1673,7 @@ function renderOnboardingStep(animate = true) {
   const card = document.getElementById('onboardingCard');
   const applyStep = () => {
   const step = OB_STEPS[obStep];
+  if (card) card.classList.toggle('developer-step', !!step.isDeveloper);
   const banner = document.getElementById('obBanner');
   let blobsHtml = step.banner.blobs.map(b => {
     const pos = [];
@@ -1651,7 +1685,13 @@ function renderOnboardingStep(animate = true) {
   }).join('');
   banner.style.background = step.banner.bg;
   banner.innerHTML = `${blobsHtml}<div class="onboarding-banner-emoji">${step.banner.emoji}</div>`;
-  document.getElementById('obStepTag').textContent = `Step ${obStep + 1} of ${OB_STEPS.length}`;
+  const stepTag = document.getElementById('obStepTag');
+  if (step.isDeveloper) {
+    stepTag.style.display = 'none';
+  } else {
+    stepTag.style.display = 'inline-flex';
+    stepTag.textContent = `Step ${obStep} of ${OB_STEPS.length - 1}`;
+  }
   document.getElementById('obTitle').textContent = step.title;
   document.getElementById('obDesc').textContent = step.desc;
   const pillsEl = document.getElementById('obPills');
