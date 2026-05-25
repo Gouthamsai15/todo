@@ -900,6 +900,14 @@ body.dark-mode .list-cell.today-col {
 body.dark-mode .calendar-habit-selector {
   border-bottom-color: rgba(255,255,255,0.08);
 }
+body.dark-mode .cal-nav-btn {
+  background: #16213e;
+  color: #e0e0e0;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+body.dark-mode .cal-nav-btn:active {
+  background: #1f2f55;
+}
 body.dark-mode .cal-nav-icon {
   background: #16213e;
 }
@@ -2268,6 +2276,11 @@ function renderAnalyticsOverview(container) {
 
 function renderAnalyticsCharts(container) {
   const d = getAnalyticsData();
+  const isDark = document.body.classList.contains('dark-mode');
+  const chartText = isDark ? '#aaaaaa' : '#999';
+  const chartGrid = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+  const trendLine = isDark ? '#32C5FF' : '#111111';
+  const trendFill = isDark ? 'rgba(50,197,255,0.16)' : 'rgba(17,17,17,0.07)';
   container.innerHTML = `
     <div class="chart-card" style="margin-top:14px;">
       <div class="chart-card-title">30-Day Completion Trend</div>
@@ -2294,15 +2307,15 @@ function renderAnalyticsCharts(container) {
     const lineCtx = document.getElementById('lineChart');
     if (lineCtx) new Chart(lineCtx, {
       type: 'line',
-      data: { labels: d.monthData.map((_,i) => i % 5 === 0 ? d.monthData[i].ds.slice(5) : ''), datasets: [{ label: 'Completion %', data: d.monthData.map(m => m.pct), borderColor: '#111111', backgroundColor: 'rgba(17,17,17,0.07)', borderWidth: 2, pointRadius: 0, pointHoverRadius: 4, fill: true, tension: 0.4 }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#999' } }, y: { min: 0, max: 100, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10 }, color: '#999', callback: v => v + '%' } } } }
+      data: { labels: d.monthData.map((_,i) => i % 5 === 0 ? d.monthData[i].ds.slice(5) : ''), datasets: [{ label: 'Completion %', data: d.monthData.map(m => m.pct), borderColor: trendLine, backgroundColor: trendFill, borderWidth: 3, pointRadius: 0, pointHoverRadius: 4, pointHoverBackgroundColor: trendLine, fill: true, tension: 0.4 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { display: false }, ticks: { font: { size: 10 }, color: chartText } }, y: { min: 0, max: 100, grid: { color: chartGrid }, ticks: { font: { size: 10 }, color: chartText, callback: v => v + '%' } } } }
     });
 
     const barCtx = document.getElementById('barChart');
     if (barCtx) new Chart(barCtx, {
       type: 'bar',
       data: { labels: d.habitPerf.map(h => h.icon + ' ' + h.name.slice(0,12)), datasets: [{ data: d.habitPerf.map(h => h.eff), backgroundColor: d.habitPerf.map(h => h.color), borderRadius: 6, borderSkipped: false }] },
-      options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { min: 0, max: 100, ticks: { callback: v => v + '%', font: { size: 10 }, color: '#999' }, grid: { color: 'rgba(0,0,0,0.05)' } }, y: { ticks: { font: { size: 11 }, color: '#555' }, grid: { display: false } } } }
+      options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { min: 0, max: 100, ticks: { callback: v => v + '%', font: { size: 10 }, color: chartText }, grid: { color: chartGrid } }, y: { ticks: { font: { size: 11 }, color: isDark ? '#e0e0e0' : '#555' }, grid: { display: false } } } }
     });
 
     const pieCtx = document.getElementById('pieChart');
