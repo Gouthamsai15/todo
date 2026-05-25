@@ -788,6 +788,39 @@ body.dark-mode .insight-pill,
 body.dark-mode .pomo-skip-btn,
 body.dark-mode .pomo-reset-btn,
 body.dark-mode .pomo-sound-btn { background: var(--cream2); color: var(--soft-black); }
+body.dark-mode .day-item.today .day-num,
+body.dark-mode .cal-cell.today {
+  background: var(--sky);
+  color: #07111f;
+}
+body.dark-mode .day-item.selected .day-num,
+body.dark-mode .cal-cell.selected-day {
+  background: #e0e0e0;
+  color: #0f3460 !important;
+}
+body.dark-mode .day-item.has-habits .day-dot,
+body.dark-mode .cal-cell.completed-mark::after {
+  background: var(--teal);
+}
+body.dark-mode .grid-cell.today-cell,
+body.dark-mode .list-cell.today-col {
+  border-color: rgba(50,197,255,0.55);
+}
+body.dark-mode .calendar-habit-selector {
+  border-bottom-color: rgba(255,255,255,0.08);
+}
+body.dark-mode .cal-nav-icon {
+  background: #16213e;
+}
+body.dark-mode .cal-nav-icon-top {
+  background: var(--sky);
+  color: #07111f;
+}
+body.dark-mode .cal-nav-icon-date,
+body.dark-mode .nav-item.active .cal-nav-icon-date,
+body.dark-mode .icon-btn .cal-nav-icon-date {
+  color: #e0e0e0;
+}
 body.dark-mode .welcome-modal,
 body.dark-mode .onboarding-card { background: #1a1a2e; }
 body.dark-mode .welcome-input { background: #16213e; color: #e0e0e0; }
@@ -955,6 +988,52 @@ body.dark-mode .app-loader { background: #1a1a2e; }
 .pomo-log-title { font-size:13px; font-weight:700; color:var(--soft-black); margin-bottom:10px; }
 .pomo-log-item { display:flex; align-items:center; gap:10px; padding:8px 0; border-top:1px solid var(--cream); font-size:12px; }
 .pomo-log-dot { width:10px; height:10px; border-radius:50%; flex-shrink:0; }
+body.dark-mode #page-pomodoro { background: var(--cream); }
+body.dark-mode #page-pomodoro .pomo-mode-btn {
+  background: #16213e;
+  border-color: rgba(255,255,255,0.08);
+  color: #aaaaaa;
+}
+body.dark-mode #page-pomodoro .pomo-mode-btn.active {
+  background: var(--sky);
+  border-color: var(--sky);
+  color: #07111f;
+}
+body.dark-mode #page-pomodoro .pomo-clock-card,
+body.dark-mode #page-pomodoro .pomo-stat-box,
+body.dark-mode #page-pomodoro .pomo-sound-card,
+body.dark-mode #page-pomodoro .pomo-session-log,
+body.dark-mode #page-pomodoro [data-pomo-panel] {
+  background: #0f3460 !important;
+  border: 1px solid rgba(255,255,255,0.06);
+}
+body.dark-mode #page-pomodoro .pomo-phase-badge.focus {
+  background: var(--sky);
+  color: #07111f;
+}
+body.dark-mode #page-pomodoro .pomo-play-btn,
+body.dark-mode #page-pomodoro .pomo-set-btn {
+  background: var(--sky);
+  color: #07111f;
+  box-shadow: 0 4px 16px rgba(50,197,255,0.25);
+}
+body.dark-mode #page-pomodoro .pomo-skip-btn,
+body.dark-mode #page-pomodoro .pomo-reset-btn,
+body.dark-mode #page-pomodoro .pomo-sound-btn,
+body.dark-mode #page-pomodoro .pomo-custom-inp {
+  background: #16213e !important;
+  border-color: rgba(255,255,255,0.08);
+  color: #e0e0e0 !important;
+}
+body.dark-mode #page-pomodoro .pomo-sound-btn.playing {
+  background: var(--teal);
+  border-color: var(--teal);
+  color: #07111f;
+}
+body.dark-mode #page-pomodoro .pomo-log-item { border-top-color: rgba(255,255,255,0.08); }
+body.dark-mode #page-pomodoro .pomo-ring-bg { stroke: #16213e; }
+body.dark-mode #page-pomodoro .pomo-ring-progress.focus { stroke: var(--sky); }
+body.dark-mode #page-pomodoro .pomo-ring-progress.brk { stroke: var(--teal); }
 </style>
 </head>
 <body>
@@ -2796,7 +2875,7 @@ function renderPomodoro() {
       ${modes.map(md => `<div class="pomo-mode-btn ${s.mode === md.id ? 'active' : ''}" onclick="setPomoMode('${md.id}')">${md.label}<small>${md.sub}</small></div>`).join('')}
     </div>
     ${s.mode === 'custom' ? `
-    <div style="background:var(--white);border-radius:var(--radius-xl);padding:16px;box-shadow:var(--shadow-card);">
+    <div data-pomo-panel style="background:var(--white);border-radius:var(--radius-xl);padding:16px;box-shadow:var(--shadow-card);">
       <div style="font-size:12px;font-weight:700;color:var(--text-mid);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px;">Custom Duration</div>
       <div class="pomo-custom-row">
         <div style="flex:1;">
@@ -2814,8 +2893,8 @@ function renderPomodoro() {
       <div class="pomo-phase-badge ${s.isBreak ? 'brk' : 'focus'}">${s.isBreak ? '☕ Break Time' : '🎯 Focus Time'}</div>
       <div class="pomo-svg-wrap">
         <svg width="180" height="180" viewBox="0 0 180 180">
-          <circle cx="90" cy="90" r="${r}" fill="none" stroke="#EDE8DC" stroke-width="8"/>
-          <circle cx="90" cy="90" r="${r}" fill="none" stroke="${s.isBreak ? '#00C9A7' : '#111111'}" stroke-width="8"
+          <circle class="pomo-ring-bg" cx="90" cy="90" r="${r}" fill="none" stroke="var(--cream2)" stroke-width="8"/>
+          <circle class="pomo-ring-progress ${s.isBreak ? 'brk' : 'focus'}" cx="90" cy="90" r="${r}" fill="none" stroke="${s.isBreak ? 'var(--teal)' : 'var(--soft-black)'}" stroke-width="8"
             stroke-dasharray="${circ}" stroke-dashoffset="${circ - dash}"
             stroke-linecap="round" style="transition:stroke-dashoffset .5s;"/>
         </svg>
@@ -3044,14 +3123,13 @@ function startSound(type) {
 }
 
 // ===== DARK MODE =====
-function setDarkMode(isDark, notify = false) {
+function setDarkMode(isDark) {
   const checkbox = document.getElementById('themeCheckbox');
   const toggle = document.getElementById('darkModeToggle');
   document.body.classList.toggle('dark-mode', isDark);
   localStorage.setItem('habitra_darkmode', isDark ? 'true' : 'false');
   if (checkbox) checkbox.checked = isDark;
   if (toggle) toggle.setAttribute('aria-checked', isDark ? 'true' : 'false');
-  if (notify) showToast(isDark ? 'Dark mode on' : 'Light mode on');
 }
 
 function initDarkMode() {
@@ -3063,16 +3141,16 @@ function initDarkMode() {
   if (toggle) {
     toggle.addEventListener('click', (event) => {
       event.preventDefault();
-      setDarkMode(!document.body.classList.contains('dark-mode'), true);
+      setDarkMode(!document.body.classList.contains('dark-mode'));
     });
     toggle.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' || event.key === ' ') {
         event.preventDefault();
-        setDarkMode(!document.body.classList.contains('dark-mode'), true);
+        setDarkMode(!document.body.classList.contains('dark-mode'));
       }
     });
   }
-  if (checkbox) checkbox.addEventListener('change', () => setDarkMode(checkbox.checked, true));
+  if (checkbox) checkbox.addEventListener('change', () => setDarkMode(checkbox.checked));
 }
 
 // ===== INIT =====
