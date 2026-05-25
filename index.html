@@ -748,6 +748,74 @@ body {
 .spacer { height: 12px; }
 .section-divider { height: 1px; background: rgba(0,0,0,0.04); margin: 0 20px; }
 
+/* ===== DARK MODE ===== */
+body.dark-mode {
+  --cream: #1a1a2e;
+  --cream2: #16213e;
+  --white: #0f3460;
+  --soft-black: #e0e0e0;
+  --text-mid: #aaaaaa;
+  --text-light: #777777;
+  --shadow-soft: 0 4px 20px rgba(0,0,0,0.4);
+  --shadow-card: 0 2px 12px rgba(0,0,0,0.3);
+}
+body.dark-mode { background: #090f1f; color: var(--soft-black); }
+body.dark-mode .app-shell { background: var(--cream); box-shadow: 0 0 60px rgba(0,0,0,0.45); }
+body.dark-mode .bottom-nav { background: #0f3460; border-top-color: rgba(255,255,255,0.06); }
+body.dark-mode .top-header { background: #0f3460; border-bottom-color: rgba(255,255,255,0.06); }
+body.dark-mode .habit-card,
+body.dark-mode .settings-group,
+body.dark-mode .calendar-main,
+body.dark-mode .chart-card,
+body.dark-mode .email-settings-card,
+body.dark-mode .weekly-report-preview,
+body.dark-mode .pomo-clock-card,
+body.dark-mode .pomo-stat-box,
+body.dark-mode .pomo-sound-card,
+body.dark-mode .pomo-session-log { background: var(--white); }
+body.dark-mode .modal-sheet { background: #1a1a2e; }
+body.dark-mode .form-input,
+body.dark-mode .note-textarea,
+body.dark-mode .pomo-custom-inp,
+body.dark-mode .email-input-field { background: #16213e; color: #e0e0e0; }
+body.dark-mode .icon-btn,
+body.dark-mode .btn-note,
+body.dark-mode .detail-action-btn,
+body.dark-mode .cal-chip,
+body.dark-mode .report-stat-box,
+body.dark-mode .report-habit-tag,
+body.dark-mode .insight-pill,
+body.dark-mode .pomo-skip-btn,
+body.dark-mode .pomo-reset-btn,
+body.dark-mode .pomo-sound-btn { background: var(--cream2); color: var(--soft-black); }
+body.dark-mode .welcome-modal,
+body.dark-mode .onboarding-card { background: #1a1a2e; }
+body.dark-mode .welcome-input { background: #16213e; color: #e0e0e0; }
+body.dark-mode .app-loader { background: #1a1a2e; }
+
+/* Theme Switch Button */
+.theme-switch { --toggle-size: 18px; --container-width: 5.625em; --container-height: 2.5em; --container-radius: 6.25em; --container-light-bg: #3D7EAE; --container-night-bg: #1D1F2C; --circle-container-diameter: 3.375em; --sun-moon-diameter: 2.125em; --sun-bg: #ECCA2F; --moon-bg: #C4C9D1; --spot-color: #959DB1; --circle-container-offset: calc((var(--circle-container-diameter) - var(--container-height)) / 2 * -1); --stars-color: #fff; --clouds-color: #F3FDFF; --back-clouds-color: #AACADF; --transition: .5s cubic-bezier(0, -0.02, 0.4, 1.25); --circle-transition: .3s cubic-bezier(0, -0.02, 0.35, 1.17); display: inline-flex; align-items: center; flex-shrink: 0; outline: none; }
+.theme-switch:focus-visible .theme-switch__container { outline: 2px solid var(--sky); outline-offset: 3px; }
+.theme-switch, .theme-switch *, .theme-switch *::before, .theme-switch *::after { -webkit-box-sizing: border-box; box-sizing: border-box; margin: 0; padding: 0; font-size: var(--toggle-size); }
+.theme-switch__container { width: var(--container-width); height: var(--container-height); background-color: var(--container-light-bg); border-radius: var(--container-radius); overflow: hidden; cursor: pointer; -webkit-box-shadow: 0em -0.062em 0.062em rgba(0,0,0,0.25), 0em 0.062em 0.125em rgba(255,255,255,0.94); box-shadow: 0em -0.062em 0.062em rgba(0,0,0,0.25), 0em 0.062em 0.125em rgba(255,255,255,0.94); -webkit-transition: var(--transition); -o-transition: var(--transition); transition: var(--transition); position: relative; }
+.theme-switch__container::before { content: ""; position: absolute; z-index: 1; inset: 0; -webkit-box-shadow: 0em 0.05em 0.187em rgba(0,0,0,0.25) inset, 0em 0.05em 0.187em rgba(0,0,0,0.25) inset; box-shadow: 0em 0.05em 0.187em rgba(0,0,0,0.25) inset, 0em 0.05em 0.187em rgba(0,0,0,0.25) inset; border-radius: var(--container-radius); }
+.theme-switch__checkbox { display: none; }
+.theme-switch__circle-container { width: var(--circle-container-diameter); height: var(--circle-container-diameter); background-color: rgba(255,255,255,0.1); position: absolute; left: var(--circle-container-offset); top: var(--circle-container-offset); border-radius: var(--container-radius); -webkit-box-shadow: inset 0 0 0 3.375em rgba(255,255,255,0.1), inset 0 0 0 3.375em rgba(255,255,255,0.1), 0 0 0 0.625em rgba(255,255,255,0.1), 0 0 0 1.25em rgba(255,255,255,0.1); box-shadow: inset 0 0 0 3.375em rgba(255,255,255,0.1), inset 0 0 0 3.375em rgba(255,255,255,0.1), 0 0 0 0.625em rgba(255,255,255,0.1), 0 0 0 1.25em rgba(255,255,255,0.1); display: -webkit-box; display: -ms-flexbox; display: flex; -webkit-transition: var(--circle-transition); -o-transition: var(--circle-transition); transition: var(--circle-transition); pointer-events: none; }
+.theme-switch__sun-moon-container { pointer-events: auto; position: relative; z-index: 2; width: var(--sun-moon-diameter); height: var(--sun-moon-diameter); margin: auto; border-radius: var(--container-radius); background-color: var(--sun-bg); -webkit-box-shadow: 0.062em 0.062em 0.062em 0em rgba(254,255,239,0.61) inset, 0em -0.062em 0.062em 0em #a1872a inset; box-shadow: 0.062em 0.062em 0.062em 0em rgba(254,255,239,0.61) inset, 0em -0.062em 0.062em 0em #a1872a inset; -webkit-filter: drop-shadow(0.062em 0.125em 0.125em rgba(0,0,0,0.25)) drop-shadow(0em 0.062em 0.125em rgba(0,0,0,0.25)); filter: drop-shadow(0.062em 0.125em 0.125em rgba(0,0,0,0.25)) drop-shadow(0em 0.062em 0.125em rgba(0,0,0,0.25)); overflow: hidden; -webkit-transition: var(--transition); -o-transition: var(--transition); transition: var(--transition); }
+.theme-switch__moon { -webkit-transform: translateX(100%); -ms-transform: translateX(100%); transform: translateX(100%); width: 100%; height: 100%; background-color: var(--moon-bg); border-radius: inherit; -webkit-box-shadow: 0.062em 0.062em 0.062em 0em rgba(254,255,239,0.61) inset, 0em -0.062em 0.062em 0em #969696 inset; box-shadow: 0.062em 0.062em 0.062em 0em rgba(254,255,239,0.61) inset, 0em -0.062em 0.062em 0em #969696 inset; -webkit-transition: var(--transition); -o-transition: var(--transition); transition: var(--transition); position: relative; }
+.theme-switch__spot { position: absolute; top: 0.75em; left: 0.312em; width: 0.75em; height: 0.75em; border-radius: var(--container-radius); background-color: var(--spot-color); -webkit-box-shadow: 0em 0.0312em 0.062em rgba(0,0,0,0.25) inset; box-shadow: 0em 0.0312em 0.062em rgba(0,0,0,0.25) inset; }
+.theme-switch__spot:nth-of-type(2) { width: 0.375em; height: 0.375em; top: 0.937em; left: 1.375em; }
+.theme-switch__spot:nth-last-of-type(3) { width: 0.25em; height: 0.25em; top: 0.312em; left: 0.812em; }
+.theme-switch__clouds { width: 1.25em; height: 1.25em; background-color: var(--clouds-color); border-radius: var(--container-radius); position: absolute; bottom: -0.625em; left: 0.312em; -webkit-box-shadow: 0.937em 0.312em var(--clouds-color), -0.312em -0.312em var(--back-clouds-color), 1.437em 0.375em var(--clouds-color), 0.5em -0.125em var(--back-clouds-color), 2.187em 0 var(--clouds-color), 1.25em -0.062em var(--back-clouds-color), 2.937em 0.312em var(--clouds-color), 2em -0.312em var(--back-clouds-color), 3.625em -0.062em var(--clouds-color), 2.625em 0em var(--back-clouds-color), 4.5em -0.312em var(--clouds-color), 3.375em -0.437em var(--back-clouds-color), 4.625em -1.75em 0 0.437em var(--clouds-color), 4em -0.625em var(--back-clouds-color), 4.125em -2.125em 0 0.437em var(--back-clouds-color); box-shadow: 0.937em 0.312em var(--clouds-color), -0.312em -0.312em var(--back-clouds-color), 1.437em 0.375em var(--clouds-color), 0.5em -0.125em var(--back-clouds-color), 2.187em 0 var(--clouds-color), 1.25em -0.062em var(--back-clouds-color), 2.937em 0.312em var(--clouds-color), 2em -0.312em var(--back-clouds-color), 3.625em -0.062em var(--clouds-color), 2.625em 0em var(--back-clouds-color), 4.5em -0.312em var(--clouds-color), 3.375em -0.437em var(--back-clouds-color), 4.625em -1.75em 0 0.437em var(--clouds-color), 4em -0.625em var(--back-clouds-color), 4.125em -2.125em 0 0.437em var(--back-clouds-color); -webkit-transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25); -o-transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25); transition: 0.5s cubic-bezier(0, -0.02, 0.4, 1.25); }
+.theme-switch__stars-container { position: absolute; color: var(--stars-color); top: -100%; left: 0.312em; width: 2.75em; height: auto; -webkit-transition: var(--transition); -o-transition: var(--transition); transition: var(--transition); }
+.theme-switch__checkbox:checked + .theme-switch__container { background-color: var(--container-night-bg); }
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container { left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter)); }
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__circle-container:hover { left: calc(100% - var(--circle-container-offset) - var(--circle-container-diameter) - 0.187em); }
+.theme-switch__circle-container:hover { left: calc(var(--circle-container-offset) + 0.187em); }
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__moon { -webkit-transform: translate(0); -ms-transform: translate(0); transform: translate(0); }
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__clouds { bottom: -4.062em; }
+.theme-switch__checkbox:checked + .theme-switch__container .theme-switch__stars-container { top: 50%; -webkit-transform: translateY(-50%); -ms-transform: translateY(-50%); transform: translateY(-50%); }
+
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-thumb { background: var(--cream2); border-radius: 4px; }
 
@@ -941,6 +1009,26 @@ body {
           <div class="header-date" id="headerDate">Today</div>
         </div>
         <div class="header-icons">
+          <label class="theme-switch" id="darkModeToggle" title="Toggle Dark Mode" role="switch" aria-label="Toggle dark mode" aria-checked="false" tabindex="0">
+            <input type="checkbox" class="theme-switch__checkbox" id="themeCheckbox">
+            <div class="theme-switch__container">
+              <div class="theme-switch__clouds"></div>
+              <div class="theme-switch__stars-container">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 55" fill="none">
+                  <path fill-rule="evenodd" clip-rule="evenodd" d="M135.831 3.00688C135.055 3.85027 134.111 4.29946 133 4.35447C134.111 4.40947 135.055 4.85867 135.831 5.71206C136.608 6.55545 136.996 7.56611 136.996 8.72197C136.996 7.56611 137.385 6.55545 138.161 5.71206C138.937 4.85867 139.881 4.40947 140.992 4.35447C139.881 4.29946 138.937 3.85027 138.161 3.00688C137.385 2.16349 136.996 1.15282 136.996 0C136.996 1.15282 136.608 2.16349 135.831 3.00688ZM123.219 8.81817C121.978 10.1744 120.538 10.8786 118.9 10.9529C120.538 11.0271 121.978 11.7313 123.219 13.0876C124.46 14.4438 125.08 16.0695 125.08 17.9647C125.08 16.0695 125.701 14.4438 126.941 13.0876C128.182 11.7313 129.622 11.0271 131.26 10.9529C129.622 10.8786 128.182 10.1744 126.941 8.81817C125.701 7.46191 125.08 5.83623 125.08 3.94104C125.08 5.83623 124.46 7.46191 123.219 8.81817ZM100.705 12.0049C102.841 12.1019 104.587 12.9475 105.943 14.5432C107.299 16.1389 107.977 18.0793 107.977 20.3647C107.977 18.0793 108.655 16.1389 110.011 14.5432C111.367 12.9475 113.113 12.1019 115.249 12.0049C113.113 11.908 111.367 11.0623 110.011 9.46666C108.655 7.87102 107.977 5.93056 107.977 3.64515C107.977 5.93056 107.299 7.87102 105.943 9.46666C104.587 11.0623 102.841 11.908 100.705 12.0049Z" fill="currentColor"/>
+                </svg>
+              </div>
+              <div class="theme-switch__circle-container">
+                <div class="theme-switch__sun-moon-container">
+                  <div class="theme-switch__moon">
+                    <div class="theme-switch__spot"></div>
+                    <div class="theme-switch__spot"></div>
+                    <div class="theme-switch__spot"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </label>
           <button class="icon-btn" id="viewToggleBtn" title="Toggle View">⊞</button>
           <!-- FIX 1: Dynamic date icon in header calendar button -->
           <button class="icon-btn" id="openCalBtn" title="Calendar">
@@ -2955,9 +3043,42 @@ function startSound(type) {
   }
 }
 
+// ===== DARK MODE =====
+function setDarkMode(isDark, notify = false) {
+  const checkbox = document.getElementById('themeCheckbox');
+  const toggle = document.getElementById('darkModeToggle');
+  document.body.classList.toggle('dark-mode', isDark);
+  localStorage.setItem('habitra_darkmode', isDark ? 'true' : 'false');
+  if (checkbox) checkbox.checked = isDark;
+  if (toggle) toggle.setAttribute('aria-checked', isDark ? 'true' : 'false');
+  if (notify) showToast(isDark ? 'Dark mode on' : 'Light mode on');
+}
+
+function initDarkMode() {
+  const saved = localStorage.getItem('habitra_darkmode');
+  const checkbox = document.getElementById('themeCheckbox');
+  const toggle = document.getElementById('darkModeToggle');
+  setDarkMode(saved === 'true');
+
+  if (toggle) {
+    toggle.addEventListener('click', (event) => {
+      event.preventDefault();
+      setDarkMode(!document.body.classList.contains('dark-mode'), true);
+    });
+    toggle.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        setDarkMode(!document.body.classList.contains('dark-mode'), true);
+      }
+    });
+  }
+  if (checkbox) checkbox.addEventListener('change', () => setDarkMode(checkbox.checked, true));
+}
+
 // ===== INIT =====
 function init() {
   loadData();
+  initDarkMode();
   if (window.emailjs) emailjs.init(EMAILJS_PUBLIC_KEY);
   checkAndSendWeeklyMail();
   setInterval(() => checkAndSendWeeklyMail(), 60 * 60 * 1000);
