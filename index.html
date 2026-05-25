@@ -140,6 +140,13 @@ body {
   transition: background .15s;
 }
 .btn-note:active { background: var(--cream2); }
+.btn-edit {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--cream); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; font-size: 14px;
+  color: var(--soft-black); transition: background .15s, transform .15s;
+}
+.btn-edit:active { background: var(--cream2); transform: scale(.92); }
 
 .habit-grid { display: flex; gap: 3px; flex-wrap: wrap; }
 .grid-cell {
@@ -488,6 +495,22 @@ body {
 .habit-perf-bar-fill { height: 100%; border-radius: 3px; transition: width .6s cubic-bezier(.34,1.56,.64,1); }
 .habit-perf-pct { font-size: 13px; font-weight: 700; color: var(--soft-black); flex-shrink: 0; }
 
+.badges-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px 12px; }
+.badge-card {
+  background: var(--white); border-radius: var(--radius-lg); padding: 14px 12px;
+  box-shadow: var(--shadow-card); display: flex; gap: 10px; align-items: center;
+  border: 1px solid transparent;
+}
+.badge-card.locked { opacity: .52; filter: grayscale(.75); }
+.badge-icon {
+  width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 20px;
+  background: linear-gradient(135deg, var(--sky), var(--teal));
+}
+.badge-name { font-size: 12px; font-weight: 800; color: var(--soft-black); line-height: 1.25; }
+.badge-desc { font-size: 10px; color: var(--text-light); margin-top: 2px; line-height: 1.35; }
+.badge-state { font-size: 10px; font-weight: 700; color: var(--teal); margin-top: 4px; }
+
 .list-view-container { overflow-x: auto; padding-bottom: 8px; }
 .list-view-table { min-width: 100%; border-collapse: separate; border-spacing: 0; }
 .list-th-habit { padding: 8px 12px; font-size: 11px; font-weight: 600; color: var(--text-light); text-align: left; white-space: nowrap; position: sticky; left: 0; background: var(--white); z-index: 1; }
@@ -537,10 +560,14 @@ body {
 }
 .developer-credit strong {
   display: block;
-  margin-top: 3px;
-  color: var(--soft-black);
-  font-size: 12px;
-  letter-spacing: .5px;
+  margin-top: 6px;
+  color: var(--sky);
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 18px;
+  line-height: 1.15;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  text-shadow: 0 8px 24px rgba(50,197,255,0.18);
 }
 
 .settings-section { padding: 0 16px 8px; }
@@ -593,9 +620,9 @@ body {
 .detail-stat-val { font-size: 22px; font-weight: 800; color: var(--soft-black); }
 .detail-stat-lbl { font-size: 11px; color: var(--text-light); font-weight: 500; }
 
-.detail-actions-row { display: flex; gap: 10px; padding: 0 20px 16px; }
+.detail-actions-row { display: flex; gap: 10px; padding: 0 20px 16px; flex-wrap: wrap; }
 .detail-action-btn {
-  flex: 1; background: var(--cream); border: none; border-radius: var(--radius-md);
+  flex: 1 1 calc(25% - 10px); min-width: 68px; background: var(--cream); border: none; border-radius: var(--radius-md);
   padding: 12px 8px; font-size: 12px; font-weight: 600; font-family: 'Poppins', sans-serif;
   cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px;
   color: var(--soft-black); transition: background .15s;
@@ -825,6 +852,7 @@ body.dark-mode .email-settings-card,
 body.dark-mode .weekly-report-preview,
 body.dark-mode .stat-card,
 body.dark-mode .habit-perf-card,
+body.dark-mode .badge-card,
 body.dark-mode .developer-credit,
 body.dark-mode .pomo-clock-card,
 body.dark-mode .pomo-stat-box,
@@ -837,6 +865,7 @@ body.dark-mode .pomo-custom-inp,
 body.dark-mode .email-input-field { background: #16213e; color: #e0e0e0; }
 body.dark-mode .icon-btn,
 body.dark-mode .btn-note,
+body.dark-mode .btn-edit,
 body.dark-mode .detail-action-btn,
 body.dark-mode .cal-chip,
 body.dark-mode .report-stat-box,
@@ -845,6 +874,10 @@ body.dark-mode .insight-pill,
 body.dark-mode .pomo-skip-btn,
 body.dark-mode .pomo-reset-btn,
 body.dark-mode .pomo-sound-btn { background: var(--cream2); color: var(--soft-black); }
+body.dark-mode .developer-credit strong {
+  color: var(--sky);
+  text-shadow: 0 10px 30px rgba(50,197,255,0.28);
+}
 body.dark-mode .day-item.today .day-num,
 body.dark-mode .cal-cell.today {
   background: var(--sky);
@@ -1337,7 +1370,7 @@ body.dark-mode #page-pomodoro .pomo-ring-progress.brk { stroke: var(--teal); }
 <div class="modal-overlay" id="addHabitModal">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title">New Habit</div>
+    <div class="modal-title" id="habitModalTitle">New Habit</div>
     <div class="form-group">
       <div class="form-label">Habit Name</div>
       <input class="form-input" id="habitName" placeholder="e.g. Morning run, Read 20 min..." maxlength="40">
@@ -1483,6 +1516,7 @@ let selectedColor = '#FFD600';
 let selectedMood = '';
 let notePhotoData = '';
 let detailHabitId = null;
+let editingHabitId = null;
 
 const COLORS = ['#FFD600','#FF5A6E','#00C9A7','#32C5FF','#B05CFF','#FF9F1C','#4CAF50','#E91E63','#00BCD4','#9C27B0','#F44336','#3F51B5'];
 const MONTHS_SHORT = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
@@ -1877,6 +1911,7 @@ function renderHome() {
             <div class="habit-streak">🔥 <span>${streak}</span> streak &nbsp;|&nbsp; 🏆 <span style="color:var(--purple)">${calcBestStreak(habit.id)}</span> best</div>
           </div>
           <div class="habit-actions">
+            <button class="btn-edit" onclick="event.stopPropagation();openEditHabit('${habit.id}')" title="Edit Habit">✎</button>
             <button class="btn-note" onclick="event.stopPropagation();openNoteModal('${habit.id}')" title="Add Note">📝</button>
             <button class="btn-done ${done ? 'completed' : ''}"
               style="color:${habit.color};border-color:${habit.color};background:${done ? habit.color : 'transparent'};${!isToday ? 'opacity:0.4;cursor:not-allowed;' : ''}"
@@ -1990,13 +2025,38 @@ function toggleHabitDate(habitId, ds) {
 
 // ===== ADD HABIT =====
 function openAddHabit() {
+  editingHabitId = null;
+  selectedColor = COLORS[0];
   buildColorGrid();
   document.getElementById('habitName').value = '';
   selectedIcon = '⭐';
   document.getElementById('emojiDisplay').textContent = '⭐';
   document.getElementById('emojiPickerLabel').textContent = 'Tap to pick an emoji';
+  document.getElementById('habitCategory').value = 'health';
+  document.getElementById('habitModalTitle').textContent = 'New Habit';
+  const saveBtn = document.querySelector('#addHabitModal .btn-save');
+  if (saveBtn) saveBtn.textContent = 'Create Habit';
   openModal('addHabitModal');
   // Small delay then setup picker (in case modal just rendered)
+  setTimeout(setupEmojiPicker, 100);
+}
+
+function openEditHabit(habitId) {
+  const habit = state.habits.find(h => h.id === habitId);
+  if (!habit) return;
+  editingHabitId = habitId;
+  selectedIcon = habit.icon || '⭐';
+  selectedColor = habit.color || COLORS[0];
+  buildColorGrid();
+  document.getElementById('habitName').value = habit.name || '';
+  document.getElementById('emojiDisplay').textContent = selectedIcon;
+  document.getElementById('emojiPickerLabel').textContent = 'Emoji selected! Tap to change';
+  document.getElementById('habitCategory').value = habit.category || 'other';
+  document.getElementById('habitModalTitle').textContent = 'Edit Habit';
+  const saveBtn = document.querySelector('#addHabitModal .btn-save');
+  if (saveBtn) saveBtn.textContent = 'Save Changes';
+  closeModal('habitDetailModal');
+  openModal('addHabitModal');
   setTimeout(setupEmojiPicker, 100);
 }
 
@@ -2021,6 +2081,35 @@ function saveHabit() {
   if (!name) { showToast('❗ Please enter a habit name'); return; }
   state.habits.push({ id: 'h_' + Date.now(), name, icon: selectedIcon, color: selectedColor, category: document.getElementById('habitCategory').value, createdAt: new Date().toISOString() });
   saveData(); closeModal('addHabitModal'); renderHome(); showToast('🌱 Habit created!');
+}
+
+function saveHabit() {
+  const name = document.getElementById('habitName').value.trim();
+  if (!name) { showToast('Please enter a habit name'); return; }
+  const payload = { name, icon: selectedIcon, color: selectedColor, category: document.getElementById('habitCategory').value };
+  if (editingHabitId) {
+    const habit = state.habits.find(h => h.id === editingHabitId);
+    if (!habit) return;
+    Object.assign(habit, payload);
+    state.notes.forEach(n => {
+      if (n.habitId === editingHabitId) {
+        n.habitName = name;
+        n.habitIcon = selectedIcon;
+        n.habitColor = selectedColor;
+      }
+    });
+    showToast('Habit updated!');
+  } else {
+    state.habits.push({ id: 'h_' + Date.now(), ...payload, createdAt: new Date().toISOString() });
+    showToast('Habit created!');
+  }
+  saveData();
+  closeModal('addHabitModal');
+  editingHabitId = null;
+  renderHome();
+  if (state.currentPage === 'analytics') renderAnalytics();
+  if (state.currentPage === 'calendar') renderCalendarPage();
+  if (state.currentPage === 'settings') renderSettings();
 }
 
 // ===== NOTE MODAL =====
@@ -2432,6 +2521,7 @@ function openHabitDetail(habitId) {
   document.getElementById('detailHero').innerHTML = `<div class="detail-icon">${habit.icon}</div><div class="detail-name">${escHtml(habit.name)}</div><div style="font-size:12px;color:var(--text-light);margin-top:4px;">${habit.category}</div><button class="detail-done-btn" id="detailDoneBtn" style="background:${done ? habit.color : 'var(--soft-black)'}" onclick="toggleFromDetail('${habitId}')">${done ? '✅ Completed Today' : '○  Mark as Done'}</button>`;
   document.getElementById('detailStats').innerHTML = `<div class="detail-stat"><div class="detail-stat-val" style="color:var(--orange)">${streak}</div><div class="detail-stat-lbl">Current Streak</div></div><div class="detail-stat"><div class="detail-stat-val" style="color:var(--coral)">${best}</div><div class="detail-stat-lbl">Best Streak</div></div><div class="detail-stat"><div class="detail-stat-val" style="color:var(--teal)">${eff}%</div><div class="detail-stat-lbl">30-Day Rate</div></div>`;
   document.getElementById('detailActions').innerHTML = `<button class="detail-action-btn" onclick="closeModal('habitDetailModal');toggleHabit('${habitId}')"><div class="da-icon">✅</div><div>Done</div></button><button class="detail-action-btn" onclick="closeModal('habitDetailModal');openNoteModal('${habitId}')"><div class="da-icon">📝</div><div>Note</div></button><button class="detail-action-btn" onclick="closeModal('habitDetailModal');openNoteModal('${habitId}')"><div class="da-icon">📷</div><div>Photo</div></button><button class="detail-action-btn" onclick="deleteHabit('${habitId}')" style="color:var(--coral)"><div class="da-icon">🗑️</div><div>Delete</div></button>`;
+  document.getElementById('detailActions').insertAdjacentHTML('afterbegin', `<button class="detail-action-btn" onclick="openEditHabit('${habitId}')"><div class="da-icon">✎</div><div>Edit</div></button>`);
   const notes = state.notes.filter(n => n.habitId === habitId).slice(0, 5);
   document.getElementById('detailTimeline').innerHTML = notes.length === 0 ? '<div style="text-align:center;padding:16px;color:var(--text-light);font-size:13px;">No notes yet. Add one!</div>' : notes.map(n => `<div style="background:var(--cream);border-radius:var(--radius-md);padding:12px;margin-bottom:8px;"><div style="font-size:11px;color:var(--text-light);margin-bottom:4px;">${formatDateLabel(new Date(n.date+'T00:00:00'))} ${n.mood||''}</div><div style="font-size:13px;color:var(--soft-black);">${escHtml(n.text)}</div>${n.photo ? `<img src="${n.photo}" style="width:100%;border-radius:8px;margin-top:8px;max-height:120px;object-fit:cover;" loading="lazy">` : ''}</div>`).join('');
   openModal('habitDetailModal');
@@ -2482,8 +2572,47 @@ function renderSettings() {
       label.remove();
     }
   });
+  document.querySelector('.developer-credit').insertAdjacentHTML('beforebegin', renderAchievementBadges());
   renderEmailSettings();
   setTimeout(() => renderEmailSettings(), 0);
+}
+
+function getAchievementBadges() {
+  const totalCompletions = Object.keys(state.completions).length;
+  const bestStreak = Math.max(0, ...state.habits.map(h => calcBestStreak(h.id)));
+  const today = new Date();
+  const perfectWeek = state.habits.length > 0 && Array.from({ length: 7 }).every((_, i) => {
+    const d = new Date(today);
+    d.setDate(today.getDate() - i);
+    const ds = dateStr(d);
+    return state.habits.every(h => state.completions[h.id + '_' + ds]);
+  });
+  const fiveHabits = state.habits.length >= 5;
+  const firstHabit = state.habits.length > 0;
+
+  return [
+    { icon: '🌱', name: 'First Habit', desc: 'Create your first habit', unlocked: firstHabit },
+    { icon: '🔥', name: '7 Day Streak', desc: 'Reach a 7 day streak on any habit', unlocked: bestStreak >= 7 },
+    { icon: '💯', name: 'First 100', desc: 'Complete habits 100 times', unlocked: totalCompletions >= 100 },
+    { icon: '🌟', name: 'Perfect Week', desc: 'Complete every habit for 7 days', unlocked: perfectWeek },
+    { icon: '🏗️', name: 'Habit Builder', desc: 'Create 5 habits', unlocked: fiveHabits }
+  ];
+}
+
+function renderAchievementBadges() {
+  const badges = getAchievementBadges();
+  const unlocked = badges.filter(b => b.unlocked).length;
+  return `<div class="settings-section-label">Achievements ${unlocked}/${badges.length}</div>
+    <div class="badges-grid">
+      ${badges.map(b => `<div class="badge-card ${b.unlocked ? '' : 'locked'}">
+        <div class="badge-icon">${b.icon}</div>
+        <div>
+          <div class="badge-name">${b.name}</div>
+          <div class="badge-desc">${b.desc}</div>
+          <div class="badge-state">${b.unlocked ? 'Unlocked' : 'Locked'}</div>
+        </div>
+      </div>`).join('')}
+    </div>`;
 }
 
 function openNameEdit() { document.getElementById('profileNameInput').value = state.settings.name || ''; openModal('nameModal'); }
